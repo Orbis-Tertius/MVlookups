@@ -1,0 +1,15 @@
+*~
+
+*.aux
+*.blg
+*.bbl
+*.synctex.gz
+*.out
+*.pdf
+*.pdfsync
+*.toc
+*.run.xml
+*.log
+*.txt
+*.pn
+*.png
