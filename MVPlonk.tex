@@ -137,10 +137,11 @@ Permutation Arguments over Multivariate Domains
 
 \begin{abstract}
 This note presents a simple trick based on formal derivatives, which turns grand products into a grand sums, thus amenable to the (multivariate) sumcheck protocol \cite{sumcheck}.
-As an application we outline a tensor interactive oracle proof for satisfiability of arithmetic circuits in standard Plonk representation \cite{Plonk} over finite fields $F$ having cardinality larger than $4\cdot N$, where $N$ is the number of constraints.
-The oracle proof has soundness error $\bigO{\nicefrac{N}{|F|}}$, and its  prover has slightly better asymptotic complexity as in the univariate case. 
-However, the proving time is still $O(N\cdot \log(N))$, which is essentially due to batching domain evaluations of the $\log N$ many coordinate functions that define the wiring permutation of the circuit.
-Nevertheless, at least for specific permutations such as the alphabetic shift on the boolean hypercube, the permutation-invariance argument based on our approach yields a linear time prover. 
+As a first application, we describe a tensor interactive oracle proof for permutations over the Boolean hypercube $H$ having values in a finite field $F$ of characteristic larger than $|H|$ the size of the hypercube. 
+The protocol has a $O(|H|)$ prover and soundness error $O(|H|/|F|)$, and it does not rely on lookups for a matrix encoding of the permutation.
+Second, we use our multivariate permutation proof to give a tensor interactive oracle proof for the satisfiability of arithmetic circuits in standard Plonk representation \cite{Plonk}.
+Again, its prover is  linear in the circuit size. 
+However, a paper-pencil count of field operations estimates the break-even point with the univariate prover at about $N=2^{28}$ constraints.
 % and adapted to fields of arbitrary size using the techniques )  
 %Our approach complements concurrent work on proving ``plonkish'' representations over multivariate domains \cite{HyperplonkZk8, AirpodsZk8}.
 %While these are able to prove transitional constraints and lookups by means of suitable affine linear mappings of $F^{\log{N}}$, their approach apply only to multi-circuit proofs with each circuit consuming about $\sqrt N$ many constraints. 
@@ -708,6 +709,7 @@ $|Q_\mathsf M|= 5\cdot N + 1$, $|Q_\mathsf S| = N$,  $|Q_\mathsf A|= 5 \cdot N -
 \end{rem}
 
 \subsection{Generalizations}
+\label{s:PAGeneralizations}
 
 Protocol \ref{prot:PA} can be easily generalized to functions $f,g: H\longrightarrow F[Y_1,\ldots,Y_k]$ with multilinear values, 
 \begin{align*}
@@ -733,10 +735,108 @@ As the individual degrees with respect to $Y_1$, \ldots, $Y_k$ are also bounded 
 
 Alternatively, at the cost of a slight increase of the soundness error one can choose $f, g: H\longrightarrow F[X]$ with values being polynomials of degree at most $k-1$ . 
 
+\subsection{Proof of a specific permutation}
+
+Suppose that we have given a bijective mapping $\sigma: H\rightarrow H$. 
+The naive approach to prove two functions $f,g: H\longrightarrow F$ to be such that 
+\[
+g(\sigma(\vec x)) = f(\vec x) \quad\text{for all $\vec x\in H$},
+\]
+is by applying the generalized permutation argument from Section \ref{s:PAGeneralizations} to the extended $(F^n\times F)$-valued functions
+\begin{align*}
+\bar g(\vec x) = (\vec x, g(\vec x))
+\\
+\bar f(\vec x) = (\sigma(\vec x), f(\vec x)).
+\end{align*}
+This corresponds to proving the identity
+\begin{equation}
+\prod_{\vec x\in H} \Big(X + f(\vec x) + \sum_{j=1}^n \sigma_{j}(\vec x)\cdot Y_j\Big) = \prod_{\vec x\in H}  \Big(X + g(\vec x) +  \sum_{j=1}^n x_j \cdot Y_j\Big),
+\end{equation}
+in the course of which the verifier provides random $x\sample F$ for $X$ and $\vec y\sample Y^n$ for $(Y_1,\ldots, Y_n)$.
+However, this results in a superlinear prover, as the prover needs to compute the values of
+\[
+x + f(\vec x) +  \sum_{j=1}^n \sigma_{j}(\vec x)\cdot y_j
+\]
+from the given domain evaluations of $\sigma_j$ over $H$.
+(However, the computation of $x + f(\vec x) +  \sum_{j=1}^n x_j \cdot y_j$ can be done in linear time.)
+To overcome this problem, we introduce a univariate index for the domain $H=\{\pm 1\}^n$. 
+Each $(x_1,\ldots, x_n)\in H $ defines an integer from the interval $\{0,1, \ldots, 2^n -1\}$ via the linear polynomial
+\begin{equation*}
+%\label{e:iota}
+\iota(\vec x) := \sum_{j=1}^n \frac{x_i + 1}{2} \cdot 2^{j-1},
+\end{equation*}
+which we may assume to be a one-to-one mapping from $H$ into $F$ whenever its characteristic $p > |H|$.
+The targeted claim is now translated into a permutation argument for the $(F\times F)$-valued functions
+\begin{align*}
+\bar g(\vec x) = (\iota(\vec x), g(\vec x))
+\\
+\bar f(\vec x) = (\iota(\sigma(\vec x)), f(\vec x)),
+\end{align*}
+which corresponds to the polynomial identity
+\begin{equation*}
+%\label{e:PermutationIdentity2}
+\prod_{\vec x\in H} \Big(X + g(\vec x) +\iota(\sigma(\vec x))\cdot Y\Big) = \prod_{\vec x\in H}  \Big(X + f(\vec x) + \iota(\vec x) \cdot Y \Big).
+\end{equation*}
+Now, given the values of $\iota(\sigma(\vec x))$, $\iota(\vec x)$ over $H$,  and random $x, y\sample F$, both functions 
+\begin{align*}
+%\label{e:fxy}
+f_{x,y}(\vec x) &= y + f(\vec x) + \iota(\vec x) \cdot y,
+\\
+%\label{e:gxy}
+g_{x,y}(\vec x) &= x + g(\vec x) +\iota(\sigma(\vec x))\cdot y,
+\end{align*}
+can be computed over $H$ at the cost of only $O(|H|)$ field operations.
+
+%\begin{protocol}[Permutation IOP for functions over $H=\{\pm 1\}^n$]
+%\label{prot:PAfunctions}
+%Assume that $F$ is a finite field with characteristic $p > 2^n$, and let $\sigma: H\rightarrow H$ a bijective mapping.
+%Given $f,g :H\rightarrow F$, the tensor IOP for that  $f(\sigma(\vec x))=g(\vec x)$ for all $\vec x\in H$,
+% is as follows.
+%\begin{enumerate} 
+%\item
+%\label{i:PAstep1}
+%Given random samples $x, y\sample F$ from the verifier, the prover computes the values of
+%determines the function $m:H\rightarrow F$ such that for all $\vec x$ in $H$, such that $\sum_{\vec x\in H} m(\vec x) = 0$, and
+%\begin{align} 
+%\label{e:m}
+%	\Big(m(\vec x)\cdot \left( f_{x,y}(\vec x))\cdot g_{x,y}(\vec x) \right) + f_{x,y}(\vec x) - g_{x,y}(\vec x)\Big)\cdot  f_{x,y}(\vec x)\cdot g_{x,y}(\vec x)) &= 0,
+%\end{align}
+%where $f_{x,y}$ and $g_{x,y}$ are as in \eqref{e:fxy} and \eqref{e:gxy}.
+%It then sends the oracle for $m$ to the verifier.
+%
+%\item
+%\label{i:PAstep2}
+%The verifier responds with a random vector $\vec y \sample F^n$ and a batching randomness $\lambda\sample F$.
+%Now, both prover and verifier engage in the sumcheck protocol (Protocol \ref{p:Sumcheck}) for 
+%\begin{align} 
+%\label{e:sumcheckm}
+%	\sum_{\vec x \in H} Q(L_H(\vec X, \vec y), m(\vec X),  p_{x,y}(\vec X),  q_{x,y}(\vec X))&= 0,
+%\end{align}
+%where 
+%\begin{equation*}
+%Q(L, m, p, q) =   
+%L \cdot  \left(m\cdot p\cdot q + p - q\right)\cdot  p \cdot q +  \lambda \cdot m.
+%\end{equation*}
+%The sumcheck protocol outputs the expected value $v$ for the multivariate polynomial 
+%\begin{equation}
+%\label{e:QPA}
+%\begin{aligned}
+%Q(L_H(\vec X, \vec y), m(\vec X), f_{x,y}(\vec X),  g_{x,y}(\vec X))
+%\end{aligned}
+%\end{equation}
+%at $\vec X=\vec r$ sampled by the verifier in the course of the protocol.
+%
+%\item
+%The verifier queries for  $[m]$, $[f]$, $[g]$, $[\iota\circ\sigma]$ for the tensor associated with $\vec r$, and uses the answers 
+%to check whether \eqref{e:QPA} equals the expected value $v$ at $\vec X = \vec r$. 
+%(The values of $\iota(\vec r)$ and $L_H(\vec r, \vec y)$ is computed by the verifier.)
+%\end{enumerate}
+%\end{protocol}
+
 \section{Multivariate Plonk}
 
 %\subsection{Setting}
-Let $F$ denote a finite field, and $H= \{\pm 1\}^n$. 
+Let $F$ denote a finite field of characteristic $p > 2^n$, and $H= \{\pm 1\}^n$. 
 Notice that $H$ is a multiplicative subgroup of $(F^*)^n$ having order $2^n$. 
 %
 In the multivariate setting of Plonk  every $\vec x \in H$ hosts a (standard) Plonk gate with input values $w_1(\vec x)$, $w_2(\vec x)$ and $w_3(\vec x)$, i.e. a quadratic constraint
@@ -751,11 +851,11 @@ The entire arithmetic circuit is considered over
 as a subset of the multiplicative group $(F^*)^n$, where $a\in F$ is any field element not from $\{\pm 1\}$.
 We use the input value functions $w_1, w_2, w_3: H\longrightarrow F$ to write $w: \bar H\longrightarrow H$,  
 \begin{equation}
-\bar w(\vec x) = w_1(\vec x) \cup w_2( a^{-1}\cdot \vec x) \cup w_3(a^{-2}\cdot \vec x), 
+w(\vec x) = w_1(\vec x) \cup w_2( a^{-1}\cdot \vec x) \cup w_3(a^{-2}\cdot \vec x), 
 \end{equation}
 for the piecewise defined function on $\bar H$
 \[
-\bar w(\vec x) = 
+w(\vec x) = 
 \begin{cases}
 w_1(\vec x) & \text{ for }\vec x\in H,
 \\
@@ -764,22 +864,32 @@ w_2(a^{-1}\cdot\vec x) & \text{ if } \vec x \in a\cdot H,
 w_3(a^{-2}\cdot\vec x) & \text{ if } \vec x \in a^2\cdot H.
 \end{cases}
 \]
-The gate inputs are connected via a ``wiring'' permutation $\bar\sigma: \bar H\rightarrow \bar H$, which we again write piecewise defined as 
+The gate inputs are connected via a ``wiring'' permutation $\sigma: \bar H\rightarrow \bar H$, which we again write piecewise defined as 
 \begin{equation}
-\bar\sigma(\vec x) = \sigma_1(\vec x) \cup \sigma_2(a^{-1}\cdot \vec x) \cup \sigma_3(a^{-2}\cdot \vec x),
+\sigma(\vec x) = \sigma_1(\vec x) \cup \sigma_2(a^{-1}\cdot \vec x) \cup \sigma_3(a^{-2}\cdot \vec x),
 \end{equation}
 where each $\sigma_i = (\sigma_{i,1}, \ldots, \sigma_{i,n}): H \longrightarrow \bar H$ has multi-linear polynomial components $\sigma_{i,j}$ over $F$.
-To enforce that $\bar w$ is consistent with the wiring, one demands permutation invariance of $\bar w$ with respect to $\bar\sigma$, i.e.
+To enforce that $w$ is consistent with the wiring, one demands permutation invariance of $w$ with respect to $\sigma$, i.e.
 \begin{equation}
 \label{e:PermutationInvariance}
-\bar w \circ \bar\sigma = \bar w
+w (\sigma(\vec x)) =  w(\vec x)
 \end{equation}
-on $\bar H$.
-In the same manner, we write the identity mapping $\bar I: \bar H\longrightarrow \bar H$ as the piecewise defined function
+for all $\vec x\in \bar H$.
+In the same manner, we write the identity mapping $I: \bar H\longrightarrow \bar H$ as the piecewise defined function
 \[
-\bar I = I_1(\vec x) \cup I_2(a^{-1}\cdot \vec x) \cup I_3(a^{-2}\cdot \vec x),
+I = I_1(\vec x) \cup I_2(a^{-1}\cdot \vec x) \cup I_3(a^{-2}\cdot \vec x),
 \]
 where $I_i = (I_{i,1},\ldots, I_{i,n}): H\rightarrow \bar H$ has the linear components $I_{i,j}(\vec x) = a^{i-1}\cdot  x_j$.
+For the sake of the permutation invariance argument we introduce the integer indices from $\{0, 1, \ldots, |\bar H|- 1\}$on $\bar H$ by the piecewise defined function
+\begin{equation}
+\label{e:iota}
+\iota(\vec x) = \iota_1(\vec x) \cup \iota_2(a^{-1}\cdot \vec x) \cup \iota_3(a^{-2}\cdot \vec x),
+\end{equation}
+where
+\begin{align}
+\label{e:iotai}
+\iota_i (\vec X) = 2^{i-1} + \sum_{j=1}^n \frac{X_i + 1}{2}\cdot 2^{j-1}, \quad i=1,2,3.
+\end{align}
 
 \subsection{The IOP}
 
@@ -788,7 +898,7 @@ The gate constraints \eqref{e:QuadraticConstraint} are proven by applying the La
 \sum_{\vec x\in H} L_H(\vec x, \vec y) \cdot Q(\vec x, w_1(\vec x), w_2(\vec x), w_3(\vec x)) = 0.
 \]
 %which will be proven with other sumchecks in batch.
-Permutation invariance of $\bar w$ with respect to $\bar \sigma: \bar H\longrightarrow \bar H$ is equivalent to that the sequences $\{(\bar w(\vec x), \bar\sigma(\vec x))\}_{x\in \bar H}$ and $\{(\bar w(\vec x), \bar I(\vec x))\}_{x\in\bar H}$
+Permutation invariance of $w$ with respect to $\sigma: \bar H\longrightarrow \bar H$ is equivalent to that the sequences $\{(\iota(\vec x), w(\vec x))\}_{x\in \bar H}$ and $\{(\iota(\sigma(\vec x)), w(\vec x))\}_{x\in\bar H}$
 %, i.e.
 %\[
 %\{(w_1(\vec x), \sigma_1(\vec x)), (w_2(\vec x), \sigma_2(\vec x)), (w_3(\vec x), \sigma_3(\vec x))\}_{x\in  H}
@@ -798,7 +908,7 @@ Permutation invariance of $\bar w$ with respect to $\bar \sigma: \bar H\longrigh
 %\{(w_1(\vec x), I_1(\vec x)), (w_2(\vec x), I_2(\vec x)), (w_3(\vec x), I_3(\vec x))\}_{x\in  H}
 %\]
  are permutations of one another, which is proven by a permutation argument over the non-extended domain $H$: 
-Using the piecewise definition of $\bar\sigma$ and $\bar I$, the underlying polynomial identity is
+Using the piecewise definition of $\sigma$ and $I$, the underlying polynomial identity is
 %\begin{equation}
 %\label{e:PermutationInvarianceIdentity}
 %\prod_{\vec x\in \bar H} \big(X + \bar w(\vec x) + \sum_{j=1}^n \bar\sigma_{j}(\vec x)\cdot Y_j \big)
@@ -806,40 +916,32 @@ Using the piecewise definition of $\bar\sigma$ and $\bar I$, the underlying poly
 %\end{equation}
 \begin{equation}
 \label{e:PermutationInvarianceIdentity}
-\prod_{\vec x\in H} p_{\vec x}(X, \vec Y)= \prod_{\vec x\in H}  q_{\vec x}(X, \vec Y),
+\prod_{\vec x\in H} p_{\vec x}(X, Y)= \prod_{\vec x\in H}  q_{\vec x}(X, Y),
 \end{equation}
 where
+%\begin{align}
+%\label{e:FactorSigma}
+%p_{\vec x}(X, \vec Y) &=  \prod_{i=1}^3\Big(X + w_i(\vec x) + \sum_{j=1}^n \sigma_{i,j}(\vec x)\cdot Y_j\Big), 
+%\\
+%\label{e:FactorId}
+%q_{\vec x}(X, \vec Y) &= \prod_{i=1}^3 \Big(X + w_i(\vec x) +  \sum_{j=1}^n I_{i,j}(\vec x)\cdot Y_j\Big),
+%\end{align}
 \begin{align}
-\label{e:FactorSigma}
-p_{\vec x}(X, \vec Y) &=  \prod_{i=1}^3\Big(X + w_i(\vec x) + \sum_{j=1}^n \sigma_{i,j}(\vec x)\cdot Y_j\Big), 
-\\
 \label{e:FactorId}
-q_{\vec x}(X, \vec Y) &= \prod_{i=1}^3 \Big(X + w_i(\vec x) +  \sum_{j=1}^n I_{i,j}(\vec x)\cdot Y_j\Big),
+p_{\vec x}(X, Y) &= \prod_{i=1}^3 \Big(X + w_i(\vec x) +  \iota(\vec x)\cdot Y\Big),
+\\
+\label{e:FactorSigma}
+q_{\vec x}(X,  Y) &=  \prod_{i=1}^3\Big(X + w_i(\vec x) +\iota\left(\sigma_{i}(\vec x)\right)\cdot Y\Big), 
 \end{align}
-which is reduced by sampling $z_1\sample F$, $\vec y\sample F$ to the sumcheck for their logarithmic derivatives. 
-(In fact, one could reuse the $\vec y$ sampled for the constraints. 
-Instead, we shall use the random vector from the permutation argument for both.)
-%We point out that computing the domain evaluation of $p_{\vec x}(z_1, \vec y)$ and $q_{\vec x}(z_1,\vec y)$ for $\vec x\in H$ would be superlinear if evaluating naively the formulas \eqref{e:FactorSigma}, \eqref{e:FactorId}.
-%However, each of the factors is multilinear in $X$, $\vec x$ and $\vec Y$, hence one can compute the needed values by linear interpolation from the domain evaluation of  
-In the sequel we shall denote by
-\begin{equation}
-\label{e:Si}
-S_i(\vec X, \vec Y) :=\sum_{j=1}^n \sigma_{i,j}(X_1,\ldots, X_n)\cdot Y_j,
-\end{equation}
-and by
-\begin{equation}
-\label{e:Ii}
-I_i(\vec X,\vec Y) = a^{i-1}\cdot \sum_{j=1}^n X_j\cdot Y_j,
-\end{equation}
-$i=1,2,3$.
+which is reduced by sampling $x\sample F$, $y\sample F$ to the sumcheck of their logarithmic derivatives. 
 
 The precomputation phase is as follows.
-The circuit specifies the values of $s_m(\vec x), s_a(\vec x), s_b(\vec x), s_c(\vec x)$ and the wiring permutations $\sigma_{1,j}(\vec x),\sigma_{2,j}(\vec x), \sigma_{3,j}(\vec x)$, $j=1,\ldots,n$, over $H$, which are used to setup their oracles.
-
+We setup the oracles for  $s_m(\vec x), s_a(\vec x), s_b(\vec x), s_c(\vec x)$, and use the wiring permutation $\sigma$ with its function pieces $\sigma_i: H \longrightarrow \bar H$, $i=1,2,3$, is used to setup the oracles  for $\iota(\sigma_i(\vec x))$, $i=1,2,3$, where $\iota$ is the index function on $\bar H$ as defined by \eqref{e:iota} and \eqref{e:iotai}.
 
 \begin{protocol}[Multivariate IOP for Plonk]
+\label{p:Plonk}
 Suppose that $F$ is a finite field of characteristic $p > 6\cdot |H|$.
-Given the oracles from the setup, i.e. $s_m(\vec x), s_a(\vec x), s_b(\vec x), s_c(\vec x)$, $\sigma_{1,j}(\vec x),\sigma_{2,j}(\vec x), \sigma_{3,j}(\vec x)$, $j=1,\ldots,n$,  over $H$,  and witness functions $w_1(\vec x), w_2(\vec x), w_3(\vec x)$ over $H$.
+Given the oracles from the setup, i.e. $s_m(\vec x), s_a(\vec x), s_b(\vec x), s_c(\vec x)$, $\iota(\sigma_{1}(\vec x)),\iota(\sigma_{2}(\vec x)), \iota(\sigma_{3}(\vec x))$  over $H$,  and witness functions $w_1(\vec x), w_2(\vec x), w_3(\vec x)$ over $H$.
 The tensor interactive oracle proof for that $w_i(\vec x)$, $i=1,2,3$ satisfy the gate constraints \eqref{e:QuadraticConstraint} and permutation invariance equality \eqref{e:PermutationInvariance} is as follows.
 %\[
 %\mathcal L_\mathcal C = \{ x_{in} : \mathcal C(\vec x_{in}) = 0\}
@@ -847,7 +949,7 @@ The tensor interactive oracle proof for that $w_i(\vec x)$, $i=1,2,3$ satisfy th
 \begin{enumerate} 
 \item
 \label{i:PAstep1}
-Given a random sample $x \sample F$, $\vec y\sample F^n$ from the verifier, the prover determines the function $m: H\rightarrow F$ such that for all $\vec x$ in $H$,
+Given a random sample $x \sample F$, $y\sample F$ from the verifier, the prover determines the function $m: H\rightarrow F$ such that for all $\vec x$ in $H$,
 \begin{align} 
 \label{e:m}
 \Big(
@@ -856,9 +958,9 @@ m(\vec x)\cdot p(\vec x) \cdot q(\vec x)  + p(\vec x) - q(\vec x)\Big)
 \end{align}
 where 
 \begin{align}
-p(\vec x) &= \prod_{i=1}^3 \big( x + w_i(\vec x) + S_i (\vec x, \vec y)\big),
+p(\vec x) &= \prod_{i=1}^3 \big( x + w_i(\vec x) + \iota_i(\vec x)\cdot y \big),
 \\
-q(\vec x) &= \prod_{i=1}^3 \big( x + w_i(\vec x) + I_i (\vec x, \vec y)\big),
+q(\vec x) &= \prod_{i=1}^3 \big( x + w_i(\vec x) + \iota\left(\sigma_i (\vec x)\right)\cdot  y\big),
 \end{align}
 and so that $m$ satisfies $\sum_{\vec x\in H} m(\vec x) = 0$.
 It then sends the oracle for $m$ to the verifier.
@@ -882,7 +984,7 @@ L \cdot  \left(m\cdot ( p \cdot q + p - q\right)\cdot  p \cdot q +  \lambda_1 \c
 \end{equation}
 The sumcheck protocol outputs the expected value $v$ for the multivariate polynomial 
 \begin{equation}
-\label{e:PlonkSumcheckPoly}
+\label{e:QPlonk}
 \begin{aligned}
 Q(L_H(\vec X, \vec z), m(\vec X),  p(\vec X), q(\vec X), w_1(\vec X), w_2(\vec X), w_3(\vec X))
 \end{aligned}
@@ -890,24 +992,22 @@ Q(L_H(\vec X, \vec z), m(\vec X),  p(\vec X), q(\vec X), w_1(\vec X), w_2(\vec X
 at $\vec X=\vec r$ sampled by the verifier in the course of the protocol.
 
 \item
-The verifier queries $[m]$, $[w_1], [w_2], [w_3]$ and $[s_m], [s_a], [s_b], [s_c]$ for the tensor associated with $\vec r$,  and $[S_1], [S_2], [S_3]$,  for the tensor corresponding to $(\vec r, \vec y)$,
-and uses the answers 
-to check whether \eqref{e:QPA} equals the expected value $v$ at $\vec X = \vec r$. 
-(The values for $[I_1], [I_2], [I_3]$ and $L_H(\vec r, \vec z)$ are computed by the verifier.)
+The verifier queries $[m]$, $[w_1], [w_2], [w_3]$ and the circuit oracles $[s_m], [s_a], [s_b], [s_c]$, $[\iota\circ\sigma_1], [\iota\circ\sigma_2], [\iota\circ\sigma_3]$,  for the tensor corresponding to $\vec r$, and uses the answers  to check whether \eqref{e:QPlonk} equals the expected value $v$ at $\vec X = \vec r$. 
+(The values for $\iota_1(\vec r), \iota_2(\vec r), \iota_3(\vec r)$ and $L_H(\vec r, \vec z)$ are computed by the verifier.)
 \end{enumerate}
 \end{protocol}
 
-We note that for $Q$ as in \eqref{e:PlonkSumcheckPoly} the inputs $p= p(\vec X)$ and $q= q(\vec X)$ are not multilinear, and that the selector functions $s_m, s_a, s_b, s_c$ are considered as coefficients.
+We note that for $Q$ as in \eqref{e:QPlonk} the inputs $p= p(\vec X)$ and $q= q(\vec X)$ are not multilinear, and that the selector functions $s_m, s_a, s_b, s_c$ are considered as coefficients.
 We simply chose this notation for brevity. 
 In fact, $Q$ has  
 \begin{align}
 \label{e:pi}
-p_i (\vec X) &= x + w_i(\vec X) + S_i(\vec X, \vec y),\quad i=1,2,3,
+p_i (\vec X) &= x + w_i(\vec X) + \iota_i(\vec X)\cdot  y,  
 \\
 \label{e:qi}
-q_i (\vec X) &= x + w_i(\vec X) + I_i(\vec X, \vec y), \quad i=1,2,3,
+p_i (\vec X) &= x + w_i(\vec X) + \iota(\sigma_i(\vec X))\cdot y,
 \end{align}
-as well as the selector functions as multilinear inputs, giving overall $15$ multilinear variables, 
+$i=1,2,3$, as well as the selector functions as multilinear inputs, giving overall $15$ multilinear variables, 
 \begin{multline*}
 Q(L, m, p_1,p_2,p_3,q_1,q_2, q_3, w_1,w_2, w_3, s_m, s_a, s_b, s_c) = \lambda_1 \cdot m
 \\
@@ -917,72 +1017,36 @@ Q(L, m, p_1,p_2,p_3,q_1,q_2, q_3, w_1,w_2, w_3, s_m, s_a, s_b, s_c) = \lambda_1 
 This polynomial has absolute degree $d= 14$, and the individual degrees are equal to $1$, except for $p_i$, $q_i$, $i=1,2,3$, where the individual degree is $2$.
 The arithmetic complexities are $|Q_\mathsf M| = 15$, $|Q_\mathsf S| = 1$, $|Q_\mathsf A |= 6$.
 
-The prover cost is as follows.
-Using a recursive procedure as for the Lagrange kernel, the values for each $I_i(\:.\:, \vec y)$ over $H$ can be obtained in  
-\[
-|H|\cdot(\mathsf M + \mathsf A).
-\]
-In constrast,  computing $S_i(\:.\:, \vec y)$ over $H$ from the values of $\sigma_{i,j}$ over $H$ is superlinear, at the cost of
-\[
-|H|\cdot (n\cdot\mathsf M + (n-1)\cdot \mathsf A),
-\]
-for each $S_i$. 
-It takes another $2\cdot |H|\cdot \mathsf A$ to obtain each $p_i$, $q_i$, $i=1,2,3$.
-Hence computing $p, q$ over $H$ takes overall
+The prover cost of Protocol \ref{p:Plonk} as follows. 
+Given the domain evaluations for $w_1$, $w_2$, $w_3$, as well a $\iota_i$ and $\iota\circ\sigma_i$, $i=1,2,3$, 
+computing $p, q$ over $H$ takes overall
 \begin{equation}
-3\cdot |H|\cdot ( (n + 1)\cdot\mathsf M + (n+1)\cdot\mathsf A) + 4\cdot |H|\cdot \mathsf M,
+\label{e:PlonkCost1}
+ 2\cdot |H|\cdot ( 3\cdot\mathsf M + 2\cdot\mathsf A).
 \end{equation}
-and $m$ over $H$ is computed by another 
+The logarithmic derivative $m$ over $H$ is computed by another 
 \begin{equation}
+\label{e:PlonkCost2}
 4\cdot |H| \cdot\mathsf M + 1\cdot |H|\cdot \mathsf S + 1\cdot\mathsf I,
 \end{equation}
 using batch inversion.
-The sumcheck argument costs
+According to \eqref{e:SumcheckCost} the sumcheck argument costs
 \begin{equation}
+\label{e:PlonkCost3}
 % (d + 2)\cdot |H| \cdot \big((m + |Q|_M)\cdot\textsf M +  (m + |Q|_\textsf S)\cdot\textsf S + (m + |Q|_\textsf A + 1)\cdot \textsf A\big) 
-%\\
 (14 + 2) \cdot |H| \cdot \big((15 + 15) \cdot\textsf M +  (15 + 1) \cdot\textsf S + (15 + 6) \cdot \textsf A\big) 
-< 2\cdot 3\cdot |H| \cdot \big(80 \cdot\textsf M +  43\cdot\textsf S + 56 \cdot \textsf A\big),
+=  |H| \cdot \big(480 \cdot\textsf M +  256\cdot\textsf S + 336 \cdot \textsf A\big),
 \end{equation}
-and adding \eqref{}, \eqref{} and \eqref{} yields an overall cost of 
+and adding \eqref{e:PlonkCost1}, \eqref{e:PlonkCost2} and \eqref{e:PlonkCost3} yields an overall cost of 
 \begin{equation}
-|H|\cdot ((491  + 3\cdot \log|H|)\cdot\mathsf M + 256\cdot \mathsf S + (339 + 3\cdot\log|H|)\mathsf A)
+|H|\cdot (490\cdot\mathsf M + 257\cdot \mathsf S + 340\cdot \mathsf A)
 \end{equation}
 for the prover of the IOP.
 Comparing with the number of multiplications for the univariate IOP (see Appendix \ref{}), 
 \begin{equation}
 |H| \cdot ((54 + 3\cdot\log 3 + 15\cdot \log|H|)\cdot\mathsf M + \ldots,
 \end{equation}
-we obtain a break-even point at quite high domain sizes, $\log |H| \approx 36$.
-(The extra commitment cost in the univariate case neglected.)
-
-\subsection{A particular case of linear proving time}
-
-We have seen that the superlinear behaviour of the prover is due to the fact that generically, there does not seem to exist a strategy to obtain the values of $S_i(\:.\:,\vec y)$ in linear time.    
-However, for specific permutations this is possible.
-As an example, the alphabetic shift on $H$, which corresponds to the shift by $+1$ on $\{0,1\}^n$ regarded as bits $(\delta_1,\ldots, \delta_n)$ of the integers $x = \sum_{i=1}^n \delta_i \cdot 2^{i-1}$ modulo $2^n$, has the property that each $\sigma_{i,j}$ depends only on the first $j$ variables, i.e.
- \[
-\sigma_{i,j}(X_1,\ldots, X_n) = \sigma_{i,j}(X_1,\ldots, X_j),
-\] 
-allowing for a linear time recursive procedure for evaluating 
-\eqref{e:Si} for a given $\vec Y = \vec y$.
-This approach yields an alternative to the prove of shift from \cite{TensorCodes}, but it has to be investigated if there is any advantage over their strategy.
-%Improvement by encoding $S_i(\vec X, \vec Y)$ as multilinear polynomial in only $n+m$, where $n =\log|H|$ and $m=\log\log|H|$, variables
-%\begin{equation*}
-%%\label{e:Si}
-%S_i(\vec X, \vec Y) =\sum_{(\delta_1,\ldots, \delta_m)\in\{0,1\}^m}^n \sigma_{i, j(\delta_1,\ldots,\delta_m)}(X_1,\ldots, X_n)\cdot Y_1^{\delta_1}\cdots Y_m^{\delta_m},
-%\end{equation*}
-%with $j(\delta_1,\ldots, \delta_m) = \sum_{k=1}^m \delta_i \cdot 2^{m-1}$,
-%assuming that the coefficients of $S_i$ are precomputed. 
-%The domain evaluation of $S_i$ over $H\times \{\pm 1\}^m$ can be done in 
-%\[
-%2^{n+m} \cdot (m + n)
-%\]
-%field additions and substractions only.
-%we can compute $S_i(\:.\:,\vec y)$ from precomputed domain evaluation of $H\times \{\pm 1\}^{m}$ in 
-%\[
-%|H|\cdot (2^m \cdot \mathsf M + m \cdot 
-%\]
+we obtain a break-even point at quite high domain sizes, $\log |H| \approx 28.7$.
 
 \subsection{Generalizations}
 
