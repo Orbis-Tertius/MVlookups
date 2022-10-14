@@ -877,57 +877,64 @@ can be computed over $H$ at the cost of only $O(|H|)$ field operations.
 
 \section{Lookups over multivariate domains}
 
-\[
-\sum_{\vec x\in H} \frac{1}{X + f(\vec x)} = \sum_{\vec x\in H} \frac{m(\vec x)}{X + g(\vec x)}  
-\]
-
-
-\[
-\sum_{\vec x\in H} \frac{1}{x + f(\vec x)} - \frac{m(\vec x)}{x + g(\vec x)} = 0  
-\]
+%\[
+%\sum_{\vec x\in H} \frac{1}{X + f(\vec x)} = \sum_{\vec x\in H} \frac{m(\vec x)}{X + g(\vec x)}  
+%\]
+%
+%
+%\[
+%\sum_{\vec x\in H} \frac{1}{x + f(\vec x)} - \frac{m(\vec x)}{x + g(\vec x)} = 0  
+%\]
 
 
 \begin{protocol}[Lookup IOP over $H=\{\pm 1\}^n$]
 \label{prot:PA}
 Assume that $F$ is a finite field with characteristic $p > 2^n$, and let $f,g :H\rightarrow F$ be any pair of functions on the Boolean hypercube $H=\{\pm 1\}^n$.
-The tensor IOP for the existance of a permutation $\sigma: H\longrightarrow H$ such that $f(\sigma(\vec x))=g(\vec x)$ for all $\vec x\in H$,
- is as follows.
+The tensor IOP for that $f = \{f(\vec x) : \vec x\in H\}\subseteq \{g(\vec x) : \vec x\in H\}$ is as follows.
 \begin{enumerate} 
 \item
+The prover determines the multiplicity function $m:H\rightarrow F$ such that
+\[
+\sum_{\vec x\in H} \frac{1}{X + f(\vec x)} = \sum_{\vec x\in H} \frac{m(\vec x)}{X + g(\vec x)},  
+\]
+and sends the oracle for $m$ to the verifier, which returns a random sample $x\sample F$.
+
+\item
 \label{i:PAstep1}
-Given a random sample $z_1 \sample F$ from the verifier, the prover determines the function $m:H\rightarrow F$ such that for all $\vec x$ in $H$,
+Given a random sample $x$ from the verifier,  the prover determines the logarithmic derivative function $h: H\longrightarrow F$
+such that for all $\vec x$ in $H$,
 \begin{align} 
 \label{e:m}
-	\Big(m(\vec x)\cdot \left(z_1 + f(\vec x))\cdot (z_1 + g(\vec x)) \right) + f(\vec x) - g(\vec x)\Big)\cdot  (z_1 + f(\vec x))\cdot (z_1 + g(\vec x)) &= 0
+	\Big(h(\vec x)\cdot \left(x + f(\vec x))\cdot (x + g(\vec x)) \right) +  m(\vec x) \cdot (x + f(\vec x)) - (x + g(\vec x)) \Big)\cdot  (x + f(\vec x))\cdot (x + g(\vec x)) &= 0
 \end{align}
-and that $\sum_{\vec x\in H} m(\vec x) = 0$.
-It then sends the oracle for $m$ to the verifier.
+and that $\sum_{\vec x\in H} h(\vec x) = 0$.
+It then sends the oracle for $h$ to the verifier.
 
 \item
 \label{i:PAstep2}
 The verifier responds with a random vector $\vec y \sample F^n$ and a batching randomness $\lambda\sample F$.
 Now, both prover and verifier engage in the sumcheck protocol (Protocol \ref{p:Sumcheck}) for 
 \begin{align} 
-\label{e:sumcheckm}
-	\sum_{\vec x \in H} Q(L_H(\vec X, \vec y), m(\vec X),  z_1 + f(\vec X),  z_2 + g(\vec X))&= 0,
+\label{e:sumcheckh}
+	\sum_{\vec x \in H} Q(L_H(\vec X, \vec y),  h(\vec X), m(\vec X),  x + f(\vec X),  x + g(\vec X))&= 0,
 \end{align}
 where 
 \begin{equation*}
-Q(Y_1 , Y_2, Y_3, Y_4) =   
-Y_1 \cdot  \left(Y_2\cdot Y_3\cdot Y_4 + Y_3 - Y_4\right)\cdot  Y_3 \cdot Y_4 +  \lambda \cdot Y_2.
+Q(L,h,m, f_x, g_x) =   
+L\cdot  \left(h \cdot f_x \cdot g_x + h\cdot f_x-  g_x\right)\cdot  f_x \cdot g_x +  \lambda \cdot h.
 \end{equation*}
 The sumcheck protocol outputs the expected value $v$ for the multivariate polynomial 
 \begin{equation}
-\label{e:QPA}
+\label{e:Qlookup}
 \begin{aligned}
-Q(L_H(\vec X, \vec y), m(\vec X), z_1 + f(\vec X),  z_2 + g(\vec X))
+Q(L_H(\vec X, \vec y), h(\vec X), m(\vec X), x + f(\vec X),  z_2 + g(\vec X))
 \end{aligned}
 \end{equation}
 at $\vec X=\vec r$ sampled by the verifier in the course of the protocol.
 
 \item
-The verifier queries for  $[m]$, $[f]$, $[g]$ for the tensor associated with $\vec r$, and uses the answers 
-to check whether \eqref{e:QPA} equals the expected value $v$ at $\vec X = \vec r$. 
+The verifier queries for  $[f]$, $[g]$, $[m]$, and $[h]$ for the tensor associated with $\vec r$, and uses the answers 
+to check whether \eqref{e:Qlookup} equals the expected value $v$ at $\vec X = \vec r$. 
 (The value $L_H(\vec r, \vec y)$ is computed by the verifier.)
 \end{enumerate}
 \end{protocol}
