@@ -363,7 +363,7 @@ Another useful property of the logarithmic derivative of a product $f(X)=\prod_{
 \end{align*}
 where $A$ is the set comprised of all $a_i$, $i=1,\ldots, N$,  and $m(a)\in \{1,\ldots, N\}$ is the multiplicity of each $a\in A$ occoring in $(a_i)_{i=1}^N$.
 This leads to the following algebraic criterion for batch set membership.
-\begin{lem}
+\begin{lem}[Batch set membership]
 \label{lem:SetInclusion}
 Let $F$ be a field of characteristic $p>N$, and suppose that $(a_i)_{i=1}^N$, $(b_i)_{i=1}^N$ are arbitrary sequences of field elements.
 Then $\{a_i \}\subseteq \{b_i\}$ as sets (with multiples of values removed), if and only if there exists a sequence $(m_i)_{i=1}^N$ of field elements such that
@@ -411,9 +411,16 @@ $m_A(a)$ the multiplicity of $a$.
 Likewise, we do for $B=\{b_i\}$.
 Note that since $N < p$, the multiplicities can be regarded as non-zero elements from $F$.
 
-If $A\subseteq B$, let us define $m_i$ as follows.
-For every $b_i$ which is also contained in $A$, define $m_i =\frac{m_A(b_i)}{m_B(b_i)}$ as the quotient of the multiplicities.
-Otherwise, set $m_i = 0$.
+Suppose that $A\subseteq B$. 
+Set 
+\[
+m_i = 
+\begin{cases}
+\frac{m_A(b_i)}{m_B(b_i)} & \text{if }b_i\in A,
+\\
+0 &\text{otherwise}.
+\end{cases}
+\]
 This choice of $(m_i)$ obviously satisfies \eqref{e:fracs}.
 
 Conversely, suppose that \eqref{e:fracs} holds.
@@ -424,8 +431,11 @@ f(X) = \sum_{i=1}^N \frac{1}{X + a_i} &= \sum_{z\in A\cup B} \frac{m_f(z)}{X + z
 g(X) = \sum_{i=1}^N \frac{m_i}{X + b_i} & = \sum_{z\in A\cup B} \frac{m_g(z)}{X + z}.
 \end{align*}
 Note that since $N < p$, we know that for each $z\in A$ we have $m_f(z)\neq 0$. 
-By the uniqueness of fractional representations,  $m_g(z) = m_f(z)$ for $z\in A$, and therefore each $z\in A$ must occur also in $B$. 
+By the uniqueness of fractional representations,  Lemma \ref{lem:UniqueFractionalRep}, $m_g(z) = m_f(z)$ for every $z\in A$, and therefore each $z\in A$ must occur also in $B$. 
 \end{proof}
+
+
+\subsection{Tensor interactive oracle proofs}
 
 \subsection{The sumcheck protocol}
 
@@ -579,6 +589,8 @@ which is an $\bigO{|H|}$ of field operations.
 
 \section{Permutation proofs over multivariate domains}
 
+
+\subsection{Proof of an arbitrary permutation}
 Let $F$ be a finite field, and $f, g$ be two functions on the hypercube $H=\{\pm 1\}^n\subset F^n$ for which we would like to prove that there exists a permutation $\sigma: H\rightarrow H$ such that $f(\sigma(\vec x)) = g(\vec x)$ for all $\vec x\in H$, i.e.
 \[
 \prod_{\vec x \in H} (X + f(\vec x)) = \prod_{\vec x \in H} (X + g(\vec x)). 
@@ -684,7 +696,7 @@ Comparison with the entry-product protocol of \cite{TensorCodes}.
 %If the evaluation proof of that scheme does not need the coefficients, too, then the compiled protocol has a linear time prover. 
 %\end{rem}
 
-\subsection{Soundness}
+\subsubsection{Soundness}
 \label{s:PASoundness}
 
 The soundness analysis of Protocol \ref{prot:PA}, is a straight-forward application of the Schwartz-Zippel lemma and the tensor-query to point-query correspondence stated by Lemma \ref{lem:Lagrange}.
@@ -737,7 +749,7 @@ The number of variables in $Q$ are  $m= 3 + N$, the absolute remains $d=6$, and 
 $|Q_\mathsf M|= 5\cdot N + 1$, $|Q_\mathsf S| = N$,  $|Q_\mathsf A|= 5 \cdot N - 1$.
 \end{rem}
 
-\subsection{Generalizations}
+\subsubsection{Generalizations}
 \label{s:PAGeneralizations}
 
 Protocol \ref{prot:PA} can be easily generalized to functions $f,g: H\longrightarrow F[Y_1,\ldots,Y_k]$ with multilinear values, 
@@ -862,6 +874,66 @@ can be computed over $H$ at the cost of only $O(|H|)$ field operations.
 %\end{enumerate}
 %\end{protocol}
 
+
+\section{Lookups over multivariate domains}
+
+\[
+\sum_{\vec x\in H} \frac{1}{X + f(\vec x)} = \sum_{\vec x\in H} \frac{m(\vec x)}{X + g(\vec x)}  
+\]
+
+
+\[
+\sum_{\vec x\in H} \frac{1}{x + f(\vec x)} - \frac{m(\vec x)}{x + g(\vec x)} = 0  
+\]
+
+
+\begin{protocol}[Lookup IOP over $H=\{\pm 1\}^n$]
+\label{prot:PA}
+Assume that $F$ is a finite field with characteristic $p > 2^n$, and let $f,g :H\rightarrow F$ be any pair of functions on the Boolean hypercube $H=\{\pm 1\}^n$.
+The tensor IOP for the existance of a permutation $\sigma: H\longrightarrow H$ such that $f(\sigma(\vec x))=g(\vec x)$ for all $\vec x\in H$,
+ is as follows.
+\begin{enumerate} 
+\item
+\label{i:PAstep1}
+Given a random sample $z_1 \sample F$ from the verifier, the prover determines the function $m:H\rightarrow F$ such that for all $\vec x$ in $H$,
+\begin{align} 
+\label{e:m}
+	\Big(m(\vec x)\cdot \left(z_1 + f(\vec x))\cdot (z_1 + g(\vec x)) \right) + f(\vec x) - g(\vec x)\Big)\cdot  (z_1 + f(\vec x))\cdot (z_1 + g(\vec x)) &= 0
+\end{align}
+and that $\sum_{\vec x\in H} m(\vec x) = 0$.
+It then sends the oracle for $m$ to the verifier.
+
+\item
+\label{i:PAstep2}
+The verifier responds with a random vector $\vec y \sample F^n$ and a batching randomness $\lambda\sample F$.
+Now, both prover and verifier engage in the sumcheck protocol (Protocol \ref{p:Sumcheck}) for 
+\begin{align} 
+\label{e:sumcheckm}
+	\sum_{\vec x \in H} Q(L_H(\vec X, \vec y), m(\vec X),  z_1 + f(\vec X),  z_2 + g(\vec X))&= 0,
+\end{align}
+where 
+\begin{equation*}
+Q(Y_1 , Y_2, Y_3, Y_4) =   
+Y_1 \cdot  \left(Y_2\cdot Y_3\cdot Y_4 + Y_3 - Y_4\right)\cdot  Y_3 \cdot Y_4 +  \lambda \cdot Y_2.
+\end{equation*}
+The sumcheck protocol outputs the expected value $v$ for the multivariate polynomial 
+\begin{equation}
+\label{e:QPA}
+\begin{aligned}
+Q(L_H(\vec X, \vec y), m(\vec X), z_1 + f(\vec X),  z_2 + g(\vec X))
+\end{aligned}
+\end{equation}
+at $\vec X=\vec r$ sampled by the verifier in the course of the protocol.
+
+\item
+The verifier queries for  $[m]$, $[f]$, $[g]$ for the tensor associated with $\vec r$, and uses the answers 
+to check whether \eqref{e:QPA} equals the expected value $v$ at $\vec X = \vec r$. 
+(The value $L_H(\vec r, \vec y)$ is computed by the verifier.)
+\end{enumerate}
+\end{protocol}
+
+
+
 \section{Multivariate Plonk}
 
 %\subsection{Setting}
@@ -871,7 +943,7 @@ Notice that $H$ is a multiplicative subgroup of $(F^*)^n$ having order $2^n$.
 In the multivariate setting of Plonk  every $\vec x \in H$ hosts a (standard) Plonk gate with input values $w_1(\vec x)$, $w_2(\vec x)$ and $w_3(\vec x)$, i.e. a quadratic constraint
 \begin{equation}
 \label{e:QuadraticConstraint}
-Q_{\vec x}(w_1(\vec x), w_2(\vec x), w_3(\vec x) ) = s_m(\vec x)\cdot w_1(\vec x) \cdot w_2(\vec x) + s_a(\vec x) \cdot w_1(\vec x) + s_b(\vec x)\cdot w_2(\vec x) + s_c(\vec x) = 0.
+P_{\vec x}(w_1(\vec x), w_2(\vec x), w_3(\vec x) ) = s_m(\vec x)\cdot w_1(\vec x) \cdot w_2(\vec x) + s_a(\vec x) \cdot w_1(\vec x) + s_b(\vec x)\cdot w_2(\vec x) + s_c(\vec x) = 0.
 \end{equation}
 The entire arithmetic circuit is considered over
 \begin{equation}
@@ -924,7 +996,7 @@ where
 
 The gate constraints \eqref{e:QuadraticConstraint} are proven by applying the Lagrange kernel $L_H(\vec X,\vec y)$ for a random $\vec y\sample F^n$, yielding the sumcheck for
 \[
-\sum_{\vec x\in H} L_H(\vec x, \vec y) \cdot Q(\vec x, w_1(\vec x), w_2(\vec x), w_3(\vec x)) = 0.
+\sum_{\vec x\in H} L_H(\vec x, \vec y) \cdot P(\vec x, w_1(\vec x), w_2(\vec x), w_3(\vec x)) = 0.
 \]
 %which will be proven with other sumchecks in batch.
 Permutation invariance of $w$ with respect to $\sigma: \bar H\longrightarrow \bar H$ is equivalent to that the sequences $\{(\iota(\vec x), w(\vec x))\}_{x\in \bar H}$ and $\{(\iota(\sigma(\vec x)), w(\vec x))\}_{x\in\bar H}$
@@ -978,72 +1050,66 @@ The tensor interactive oracle proof for that $w_i(\vec x)$, $i=1,2,3$ satisfy th
 \begin{enumerate} 
 \item
 \label{i:PAstep1}
-Given a random sample $x \sample F$, $y\sample F$ from the verifier, the prover determines the function $m: H\rightarrow F$ such that for all $\vec x$ in $H$,
+Given a random sample $x \sample F$, $y\sample F$ from the verifier, the prover determines 
+\begin{align}
+p(\vec x) &= \prod_{i=1}^3 \big( x + w_i(\vec x) + \iota_i(\vec x)\cdot y \big),
+\\
+q(\vec x) &= \prod_{i=1}^3 \big( x + w_i(\vec x) + \iota\left(\sigma_i (\vec x)\right)\cdot  y\big),
+\end{align}
+for all $\vec x\in H$, and a function $m: H\rightarrow F$ so that
 \begin{align} 
 \label{e:m}
 \Big(
 m(\vec x)\cdot p(\vec x) \cdot q(\vec x)  + p(\vec x) - q(\vec x)\Big)
 \cdot  p(\vec x)\cdot q(\vec x) &= 0,
 \end{align}
-where 
-\begin{align}
-p(\vec x) &= \prod_{i=1}^3 \big( x + w_i(\vec x) + \iota_i(\vec x)\cdot y \big),
-\\
-q(\vec x) &= \prod_{i=1}^3 \big( x + w_i(\vec x) + \iota\left(\sigma_i (\vec x)\right)\cdot  y\big),
-\end{align}
-and so that $m$ satisfies $\sum_{\vec x\in H} m(\vec x) = 0$.
-It then sends the oracle for $m$ to the verifier.
+and  $\sum_{\vec x\in H} m(\vec x) = 0$.
+It then sends the oracles for $p,q$, and $m$ to the verifier.
 
 \item
 \label{i:PAstep2}
-The verifier responds with another random vector $\vec z \sample F^n$ and a batching randomnesses $(\lambda_1,\lambda_2)\sample F^2$.
+The verifier responds with another random vector $\vec z \sample F^n$ and batching randomnesses $\lambda_1$, $\lambda_2$, $\lambda_3$, $\lambda_4\sample F$.
 Now, both prover and verifier engage in the sumcheck protocol (Protocol \ref{p:Sumcheck}) for 
-\begin{align} 
-\label{e:PlonkSumcheckm}
-	\sum_{\vec x \in H} Q(L_H(\vec x, \vec z), m(\vec x),  p(\vec x), q(\vec x), w_1(\vec x), w_2(\vec x), w_3(\vec x))&= 0,
-\end{align}
+\begin{align*} 
+%\label{e:PlonkSumcheckm}
+	\sum_{\vec x \in H} Q(L_H(\vec x, \vec z),  m(\vec x), p(\vec x), q(\vec x), p_1(\vec x), q_1(\vec x), w_1(\vec x), \ldots, p_3(\vec x), q_3(\vec x), w_3(\vec x))&= 0,
+\end{align*}
 where 
 \begin{equation}
+\label{e:QPlonk}
 \begin{aligned}
-Q(L , m, p, q, w_1, w_2, w_3) &=   
-L \cdot  \left(m\cdot ( p \cdot q + p - q\right)\cdot  p \cdot q +  \lambda_1 \cdot m
+Q(L , m, p, q, p_1, q_2, w_1, &p_2, q_2, w_2,  p_3, q_3, w_3) =   
 \\
-&+ \lambda_2 \cdot L \cdot \left( s_m(\vec x)\cdot w_1\cdot w_2 + s_a(\vec x)\cdot w_1 + s_b(\vec x)\cdot w_2 + s_c(\vec x)\cdot w_3\right).
+& + L \cdot  \left( (m\cdot  p \cdot q + p - q\right)\cdot  p \cdot q 
+\\
+& + \lambda_1\cdot L\cdot (p - p_1\cdot p_2\cdot p_3)
+\\
+& + \lambda_2\cdot L\cdot (q - q_1\cdot q_2\cdot q_3)
+\\
+&+  \lambda_3 \cdot m
+\\
+&+ \lambda_4 \cdot L \cdot \left( s_m(\vec x)\cdot w_1\cdot w_2 + s_a(\vec x)\cdot w_1 + s_b(\vec x)\cdot w_2 + s_c(\vec x)\cdot w_3\right).
 \end{aligned}
 \end{equation}
 The sumcheck protocol outputs the expected value $v$ for the multivariate polynomial 
 \begin{equation}
-\label{e:QPlonk}
-\begin{aligned}
-Q(L_H(\vec X, \vec z), m(\vec X),  p(\vec X), q(\vec X), w_1(\vec X), w_2(\vec X), w_3(\vec X))
-\end{aligned}
+%\label{e:QPlonk}
+%\begin{aligned}
+Q(L_H(\vec X, \vec z),  m(\vec X), p(\vec X), q(\vec X), p_1(\vec X), q_1(\vec X), w_1(\vec X), \ldots, p_3(\vec X), q_3(\vec X), w_3(\vec X) )
+%\end{aligned}
 \end{equation}
 at $\vec X=\vec r$ sampled by the verifier in the course of the protocol.
 
 \item
-The verifier queries $[m]$, $[w_1], [w_2], [w_3]$ and the circuit oracles $[s_m], [s_a], [s_b], [s_c]$, $[\iota\circ\sigma_1], [\iota\circ\sigma_2], [\iota\circ\sigma_3]$,  for the tensor corresponding to $\vec r$, and uses the answers  to check whether \eqref{e:QPlonk} equals the expected value $v$ at $\vec X = \vec r$. 
+The verifier queries $[w_1], [w_2], [w_3], [p], [q], [m]$ and the circuit oracles $[s_m], [s_a], [s_b], [s_c]$, $[\iota\circ\sigma_1], [\iota\circ\sigma_2], [\iota\circ\sigma_3]$,  for the tensor corresponding to $\vec r$, and uses the answers  to check whether \eqref{e:QPlonk} equals the expected value $v$ at $\vec X = \vec r$. 
 (The values for $\iota_1(\vec r), \iota_2(\vec r), \iota_3(\vec r)$ and $L_H(\vec r, \vec z)$ are computed by the verifier.)
 \end{enumerate}
 \end{protocol}
 
-We note that for $Q$ as in \eqref{e:QPlonk} the inputs $p= p(\vec X)$ and $q= q(\vec X)$ are not multilinear, and that the selector functions $s_m, s_a, s_b, s_c$ are considered as coefficients.
+Note that the polynomial $Q$ as defined in \eqref{e:QPlonk} has the selector functions $s_m, s_a, s_b, s_c$ as coefficients.
 We simply chose this notation for brevity. 
-In fact, $Q$ has  
-\begin{align}
-\label{e:pi}
-p_i (\vec X) &= x + w_i(\vec X) + \iota_i(\vec X)\cdot  y,  
-\\
-\label{e:qi}
-p_i (\vec X) &= x + w_i(\vec X) + \iota(\sigma_i(\vec X))\cdot y,
-\end{align}
-$i=1,2,3$, as well as the selector functions as multilinear inputs, giving overall $15$ multilinear variables, 
-\begin{multline*}
-Q(L, m, p_1,p_2,p_3,q_1,q_2, q_3, w_1,w_2, w_3, s_m, s_a, s_b, s_c) = \lambda_1 \cdot m
-\\
-+ \lambda_2 \cdot L \cdot \left( s_m \cdot w_1\cdot w_2 + s_a \cdot w_1 + s_b \cdot w_2 + s_c\cdot w_3\right)
-+ L \cdot  \left(m\cdot \prod_{i=1}^3 p_i\cdot q_i  + \prod_{i=1}^3 p_i - \prod_{i=1}^3 q_i\right)\cdot \prod_{i=1}^3 p_i\cdot q_i.
-\end{multline*}
-This polynomial has absolute degree $d= 14$, and the individual degrees are equal to $1$, except for $p_i$, $q_i$, $i=1,2,3$, where the individual degree is $2$.
+In fact $Q$ has overall $17$ variables, taking these selectors into account.
+It has absolute degree $d= 6$, and the individual degrees are equal to $1$, except for $p$, $q$, $i=1,2,3$, where the individual degree is $2$.
 The arithmetic complexities are $|Q_\mathsf M| = 15$, $|Q_\mathsf S| = 1$, $|Q_\mathsf A |= 6$.
 
 The prover cost of Protocol \ref{p:Plonk} as follows. 
@@ -1063,19 +1129,20 @@ According to \eqref{e:SumcheckCost} the sumcheck argument costs
 \begin{equation}
 \label{e:PlonkCost3}
 % (d + 2)\cdot |H| \cdot \big((m + |Q|_M)\cdot\textsf M +  (m + |Q|_\textsf S)\cdot\textsf S + (m + |Q|_\textsf A + 1)\cdot \textsf A\big) 
-(14 + 2) \cdot |H| \cdot \big((15 + 15) \cdot\textsf M +  (15 + 1) \cdot\textsf S + (15 + 6) \cdot \textsf A\big) 
-=  |H| \cdot \big(480 \cdot\textsf M +  256\cdot\textsf S + 336 \cdot \textsf A\big),
+(6 + 2) \cdot |H| \cdot \big((17 + 15) \cdot\textsf M +  (17 + 1) \cdot\textsf S + (17 + 6) \cdot \textsf A\big) 
+=  |H| \cdot \big(192 \cdot\textsf M +  108\cdot\textsf S + 138 \cdot \textsf A\big),
 \end{equation}
 and adding \eqref{e:PlonkCost1}, \eqref{e:PlonkCost2} and \eqref{e:PlonkCost3} yields an overall cost of 
 \begin{equation}
-|H|\cdot (490\cdot\mathsf M + 257\cdot \mathsf S + 340\cdot \mathsf A)
+|H|\cdot (202\cdot\mathsf M + 109\cdot \mathsf S + 142\cdot \mathsf A)
 \end{equation}
 for the prover of the IOP.
-Comparing with the number of multiplications for the univariate IOP (see Appendix \ref{}), 
+Comparing with the number of multiplications for the univariate IOP (see Appendix \ref{s:UnivariatePlonk}), 
 \begin{equation}
 |H| \cdot ((54 + 3\cdot\log 3 + 15\cdot \log|H|)\cdot\mathsf M + \ldots,
 \end{equation}
-we obtain a break-even point at quite high domain sizes, $\log |H| \approx 28.7$.
+we obtain a break-even point of the multivariate IOP at about $\log |H| \approx 10$, and twice as fast in performance at about $\log|H| = 23$, not taking into account that our IOP has one oracle more than in the univariate case.
+
 
 \subsection{Generalizations}
 
@@ -1083,7 +1150,9 @@ we obtain a break-even point at quite high domain sizes, $\log |H| \approx 28.7$
 \item
 Arbitrary number of witness columns and arbitrary order constraints
 \item
-Lookups based on the proof of shift as discussed above. (Doubles the number of columns for the lookup, but works without the introduction of an algebraically tame time action on $H$.) 
+Lookups 
+\item
+transitional constraints using the shift argument from Groth, et al.
 \end{itemize}
 
 
@@ -1099,6 +1168,7 @@ Lookups based on the proof of shift as discussed above. (Doubles the number of c
 \label{s:Appendix}
 
 \subsection{TODO: Univariate Plonk}
+\label{s:UnivariatePlonk}
 
 
 %\subsection{The multivariate inner product argument}
