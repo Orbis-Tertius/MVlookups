@@ -357,46 +357,75 @@ We stress the fact that Lemma \ref{lem:LogarithmicDerivative} also applies to th
 This observation will be useful when generalizing the permutation argument to the case where $a_i$ and $b_i$ are multilinear polynomials in $Y_1, \ldots, Y_n$.
 \end{rem}
 
-%\begin{lem}
-%\label{lem:Logarithmic derivatives}
-%Let $(p_i(X))_{i=1}^n$ and $(q_i(X))_{i=1}^n$ be sequences with entries in $F[X]$ over a finite field $F$. 
-%Then
-%\begin{equation}
-%\label{e:d}
-%\prod_{i=1}^n \left(Y + p_i(X)\right) =\prod_{i=1}^n \left(Y + q_i(X)\right)
-%\end{equation}
-%in $F[X,Y]$ if and only if 
-%\begin{equation}
-%\label{e:LogDerivativeSum}
-%\sum_{i=1}^n \frac{1}{Y - p_i(X)} =\sum_{i=1} ^n\frac{1}{Y - q_i(X)}.
-%\end{equation}
-%in the rational function field $F(X,Y)$.
-%\end{lem}
-%
-%\begin{proof}
-% 
-%The lemma is a simple application of the (formal) logarithmic derivative applied to product polynomials $p(X,Y) =\prod_{i=1}^n (X - p_i(X))$.
-%By the product rule for the formal derivative, we have
-%\begin{equation}
-%\frac{\partial_Y \,p(X,Y)}{p(X,Y)} = \sum_{i=1}^n \frac{\prod_{j\in \{1,\ldots, n\}\setminus \{i\}} (Y- p_j(X)) }{p(X,Y)} = \sum_{i=1}^n \frac{1}{Y- p_i(X)},
-%\end{equation}
-%where $\partial_Y\, p(X,Y)$ is the formal derivative of $p(X,Y)$ wiht respect to $Y$.
-%
-%
-%Now, if  $p(X,Y) = \prod_{i=1}^n \left(Y + p_i(X)\right)$ and $q(X,Y) = \prod_{i=1}^n \left(Y + q_i(X)\right)$
-%coincide, so do their logarithmic derivatives.
-%To show the other direction, assume that 
-%\[
-%\frac{\partial_Y \,p(X,Y)}{p(X,Y)}  =  \frac{\partial_Y \, q(X,Y)}{q(X,Y)} 
-%\]
-%Then $\partial_Y \, p(X,Y)\cdot q(X,Y) - p(X,Y)\cdot \partial_Y \,q(X,Y) = 0$. 
-%By the quotient rule of formal derivatives,  
-%\[
-%\partial_Y\,\left(\frac{p(X,Y)}{q(X,Y)}\right)  = \frac{\partial_Y \,p(X,Y)\cdot q(X,Y) - p(X,Y)\cdot \partial_Y \,q(X,Y)} {q^2(X,Y)} = 0.
-%\]
-%This implies that $\frac{p(X,Y)}{p(X,Y)} = \frac{c(X)}{d(X)}$ for some polynomials $c(X),d(X)\in F[X]$.
-%As both $p(X,Y)$ and $p(X,Y)$ have leading coefficient in the variable $Y$  equal to $1$, we conclude that $c(X)=d(X)$, and the proof of the Lemma is complete.
-%\end{proof}
+Another useful property of the logarithmic derivative of a product $f(X)=\prod_{i=1}^N (X + a_i)$ is that
+\begin{align*}
+\frac{f(X)}{f'(X)} = \sum_{a\in A} \frac{m(a)}{X + a},
+\end{align*}
+where $A$ is the set comprised of all $a_i$, $i=1,\ldots, N$,  and $m(a)\in \{1,\ldots, N\}$ is the multiplicity of each $a\in A$ occoring in $(a_i)_{i=1}^N$.
+This leads to the following algebraic criterion for batch set membership.
+\begin{lem}
+\label{lem:SetInclusion}
+Let $F$ be a field of characteristic $p>N$, and suppose that $(a_i)_{i=1}^N$, $(b_i)_{i=1}^N$ are arbitrary sequences of field elements.
+Then $\{a_i \}\subseteq \{b_i\}$ as sets (with multiples of values removed), if and only if there exists a sequence $(m_i)_{i=1}^N$ of field elements such that
+\begin{equation}
+\label{e:fracs}
+\sum_{i=1}^N \frac{1}{X + a_i} = \sum_{i=1}^N \frac{m_i}{X + b_i}  
+\end{equation}
+in the function field $F(X)$.
+\end{lem}
+
+The proof of Lemma \ref{lem:SetInclusion}, which is given below, is an immediate consequence of the uniqueness of fractional representations
+\[
+\sum_{z \in \mathcal Z} \frac{c(z)}{X - z},
+\]
+$\mathcal Z\subseteq F$, as shown by the following auxilary lemma.
+\begin{lem}
+\label{lem:UniqueFractionalRep}
+Let $F$ be an arbitrary field and $\mathcal Z\subseteq F$, and let $m_1, m_2$ be any functions from $\mathcal Z$ into $F$.
+Then
+\begin{equation}
+\label{e:LaurentRepZero}
+\sum_{z\in\mathcal Z} \frac{m_1(z)}{X - z} = \sum_{z\in\mathcal Z} \frac{m_2(z)}{X - z}
+\end{equation}
+in the rational function field $F(X)$, if and only if $m_1(z)=m_2(z)$ for every $z\in \mathcal Z$.
+\end{lem}
+\begin{proof}
+Suppose that \eqref{e:LaurentRepZero} holds.  
+Then $\sum_{z\in\mathcal Z} \frac{m_1(z)-m_2(z)}{X - z} = 0$, and therefore
+\[
+p(X) = \prod_{w\in\mathcal Z} (X - w)\cdot\sum_{z\in\mathcal Z} \frac{m_1(z)-m_2(z)}{X - z} = \sum_{z\in\mathcal Z} (m_1(z)-m_2(z))\cdot \prod_{w\in\mathcal Z\setminus\{z\}} (X - w) = 0.
+\]
+In particular,
+\[
+p(z) = (m_1(z) - m_2(z)) \cdot  \prod_{w\in\mathcal Z\setminus\{z\}} (z - w)= 0
+\]
+for every $z\in\mathcal Z$.
+Since   $\prod_{w\in\mathcal Z\setminus\{z\}} (z - w) \neq 0$ we must have $m_1(z)  = m_2(z)$ for every $z\in\mathcal Z$. 
+The other direction is obvious.
+\end{proof}
+
+
+\begin{proof}[Proof of Lemma \ref{lem:SetInclusion}]
+Let us denote by $A=\{a_i\}$ the set of all $a_i$ occuring in the sequence $(a_i)_{i=1}^N$, and let us write 
+$m_A(a)$ the multiplicity of $a$.
+Likewise, we do for $B=\{b_i\}$.
+Note that since $N < p$, the multiplicities can be regarded as non-zero elements from $F$.
+
+If $A\subseteq B$, let us define $m_i$ as follows.
+For every $b_i$ which is also contained in $A$, define $m_i =\frac{m_A(b_i)}{m_B(b_i)}$ as the quotient of the multiplicities.
+Otherwise, set $m_i = 0$.
+This choice of $(m_i)$ obviously satisfies \eqref{e:fracs}.
+
+Conversely, suppose that \eqref{e:fracs} holds.
+Collecting fractions with the same denominator we obtain fractional representations for both sides of the equation \eqref{e:fracs},  
+\begin{align*}
+f(X) = \sum_{i=1}^N \frac{1}{X + a_i} &= \sum_{z\in A\cup B} \frac{m_f(z)}{X + z},
+\\
+g(X) = \sum_{i=1}^N \frac{m_i}{X + b_i} & = \sum_{z\in A\cup B} \frac{m_g(z)}{X + z}.
+\end{align*}
+Note that since $N < p$, we know that for each $z\in A$ we have $m_f(z)\neq 0$. 
+By the uniqueness of fractional representations,  $m_g(z) = m_f(z)$ for $z\in A$, and therefore each $z\in A$ must occur also in $B$. 
+\end{proof}
 
 \subsection{The sumcheck protocol}
 
