@@ -308,41 +308,6 @@
 	doi ={10.1561/0400000007}
 }
 
-@inproceedings{ProofsProximity,
-	author = {Guy N. Rothblum and Salil Vadhan and Avi Wigderson},
-	title = {Interactive Proofs of Proximity: Delegating Computation in Sublinear Time},
-	booktitle = {IEEE Trans. on Information Theory},
-	volume = {45(6)},
-	year = {1999},
-	doi = {10.1145/2488608.2488709}
-}
-
-@inproceedings{FRI,
-	author = {Eli Ben-Sasson and Iddo Bentov and Yinon Horesh and Michael Riabzev},
-	title = {Fast {Reed-Solomon} Interactive Oracle Proofs of Proximity},
-	booktitle = {ICALP 2018},
-	year = {2018},
-	doi = {10.4230/LIPIcs.ICALP.2018.14},
-	note = {Full paper: \url{https://eccc.weizmann.ac.il/report/2017/134/}}
-}
-
-@inproceedings{DEEPFRI,
-	author = {Eli Ben-Sasson and Lior Goldberg and Swastik Kopparty and Shubhangi Saraf},
-	title = {{DEEP-FRI}: Sampling Outside the Box Improves Soundness},
-	booktitle = {ITCS 2020},
-	year = {2020},
-	doi = {10.4230/LIPIcs.ITCS.2020.5},
-	note = {Full paper: \url{https://eprint.iacr.org/2019/336}}
-}
-
-@inproceedings{ProximityGaps,
-	author = {Eli Ben-Sasson and Dan Carmon and Yuval Ishai and Swastik Kopparty and Shubhangi Saraf},
-	title = {Proximity Gaps for {Reed-Solomon} Codes},
-	booktitle = {FOCS 2020},
-	year = {2020},
-	doi = {10.1109/FOCS46700.2020.00088},
-	note = {Full paper: \url{https://eprint.iacr.org/2020/654}}
-}
 
 
 
@@ -350,31 +315,12 @@
 %% Polynomial Commitment schemes 
 %%
 
-@inproceedings{Kate,
-  author    = {Aniket Kate and Gregory M. Zaverucha and Ian Goldberg},
-  title     = {Constant-Size Commimtments to Polynomials and Their Applications},
-  booktitle = {ASIACRYPT 2010},
-  year      = {2010},
-  editor    = {Abe M.},
-  series    = {LNCS},
-  volume    = {6477},
-  publisher = {Springer}
-}
-
-@INPROCEEDINGS{BuenzMaller,
-    author = {Benedikt B{\"u}nz and Mary Maller and Pratyush Mishra and Nirvan Tyagi and Psi Vesely},
-    title = {Proofs for Inner Pairing Products and Applications},
-    booktitle = {IACR preprint archive},
-    year = {2019},
-    pages = {117},
-    note = {\url{https://eprint.iacr.org/2019/1177}}
-}
 
 @inproceedings{Redshift,
-	author    = {Assimakis Kattis and Konstantin Panarin and Alaxander Vlasov},
-	title     = {{REDSHIFT}: Transparent SNARKs from List Polynomial Commitment {IOP}s},
-	booktitle = {IACR preprint archive},
- 	year      = {2019},
+    author    = {Assimakis Kattis and Konstantin Panarin and Alaxander Vlasov},
+    title     = {{REDSHIFT}: Transparent SNARKs from List Polynomial Commitment {IOP}s},
+    booktitle = {IACR preprint archive},
+    year      = {2019},
     note = {\url{https://eprint.iacr.org/2019/1400}}
 }
 
@@ -459,22 +405,13 @@
   note = {Full paper:\url{https://eprint.iacr.org/2020/152.pdf}}
 }
 
-@inproceedings{FullyLinearPCPs,
-  author    = {Dan Boneh and Elette Boyle and Henry Corrigan-Gibbs and Yuval Ishai},
-  title     = {Zero-Knowledge Proofs on Secret-Shared Data via Fully Linear PCPs},
-  booktitle = {CRYPTO 2019},
-  pages     = {67--97},
-  year      = {2019},
-  series    = {LNCS},
-  volume    = {11694},
-  publisher = {Springer},
-  note = {Full paper:\url{https://eprint.iacr.org/2019/188.pdf}}
-}
+
+
+
 
 %%
-%% SNARKs
-%%
-
+%% Univariate SNARKs, PIOPs
+%% 
 @inproceedings{2006:Groth,
   author    = {Jens Groth},
   title     = {Simulation-Sound {NIZK} Proofs for a Practical Language and Constant
@@ -499,6 +436,17 @@
   volume    = {6477},
   publisher = {Springer},
   doi = {10.1007/978-3-642-17373-8_19}
+}
+
+@inproceedings{Kate,
+  author    = {Aniket Kate and Gregory M. Zaverucha and Ian Goldberg},
+  title     = {Constant-Size Commimtments to Polynomials and Their Applications},
+  booktitle = {ASIACRYPT 2010},
+  year      = {2010},
+  editor    = {Abe M.},
+  series    = {LNCS},
+  volume    = {6477},
+  publisher = {Springer}
 }
 
 @inproceedings{Groth:2016,
@@ -571,118 +519,6 @@
     note = {Full paper: \url{https://eprint.iacr.org/2017/1066}}
 }
 
-%%
-%% sumcheck argument based
-%%
-
-@INPROCEEDINGS{Sumcheck,
-    author = {Carsten Lund and Lance Fortnow and Howard Karloff and Noam Nisan},
-    title = {Algebraic Methods for Interactive Proof Systems},
-    booktitle = {Journal of the Association for Computing Machinery},
-    volume = {39}, 
-    year = {1992},
-    pages = {859--868},
-    note = {Full paper: \url{https://eprint.iacr.org/2017/1066}}
-}
-
-@INPROCEEDINGS{Meir,
-    author = {Or Meir},
-    title = {{IP = PSPACE} using Error-Correcting Codes},
-    booktitle = {{SIAM} Journal on Computing},
-    volume = {42}, 
-    year = {2013},
-    note = {Full paper: \url{https://eccc.weizmann.ac.il/report/2010/137}}
-}
-
-% has a nice version of the sumcheck protocol 
-@INPROCEEDINGS{SumcheckThaler,
-    author = {Justin Thaler},
-    title = {Time-Optimal Interactive Proofs for Circuit Evaluation},
-    booktitle = {CRYPTO 2013},
-    series = {LNCS},
-    volume = {8043}, 
-    year = {2013},
-    note = {Full paper: \url{https://eprint.iacr.org/2013/351}}
-}
-
-@INPROCEEDINGS{TensorIOP,
-    author = {Jonathan Bootle and Andrea Cerulli and Essam Ghadafi and Jens Groth and Mohammad Hajiabadi and Sune K. Jakobsen},
-    title = {Linear-Time Zero-Knowledge Proofs for Arithmetic Circuit Satisfiability},
-    booktitle = {ASIACRYPT 2017},
-    series = {LNCS},
-    volume = {10626}, 
-    year = {2017},
-    note = {Full paper: \url{https://eprint.iacr.org/2017/872}}
-}
-
-% A 
-@INPROCEEDINGS{TensorCodes,
-    author = {Jonathan Bootle and Alessandro Chiesa and Jens Groth},
-    title = {Linear-Time Arguments with Sublinear Verification from Tensor Codes},
-    booktitle = {TCC 2020},
-    series = {LNCS},
-    volume = {12551}, 
-    year = {2020},
-    note = {Full paper: \url{https://eprint.iacr.org/2020/1426}}
-}
-
-
-@INPROCEEDINGS{TensorR1CS,
-    author = {Jonathan Bootle and Alessandro Chiesa and Siqi Liu},
-    title = {Zero-Knowledge {IOPs} with Linear-Time Prover and Polylogarithmic-Time Verifier},
-    booktitle = {EUROCRYPT 2022},
-    series = {LNCS},
-    volume = {13276}, 
-    year = {2022},
-    note = {Full paper: \url{https://eprint.iacr.org/2020/1527}}
-}
-
-@INPROCEEDINGS{TensorR1CSarbitraryF,
-    author = {Jonathan Bootle and Alessandro Chiesa and Ziyi Guan and Siqi Liu},
-    title = {Linear-Time Probabilistic Proofs over Every Field},
-    year = {2022},
-    booktitle = {{IACR ePrint Archive} 2020/1056},
-    note = {\url{https://eprint.iacr.org/2022/1056}}
-}
-
-@INPROCEEDINGS{TensorRothblum,
-    author = {Justin Holmgren and Ron D. Rothblum},
-    title = {Faster Sounder Succinct Arguments and {IOP}s},
-    booktitle = {CRYPTO 2022},
-    series = {LNCS},
-    volume = {13507}, 
-    year = {2022},
-    note = {Full paper: \url{https://eprint.iacr.org/2022/994}}
-}
-
-https://solvable.group/posts/air-multivariate-sumcheck/
-
-@misc{AirpodsZk8Blog,
-    author = {William Borgeaud},
-    title = {Proving {AIR} with multivariate sumchecks},
-    year = {May 21, 2022},    
-    note = {{\url{https://solvable.group/posts/air-multivariate-sumcheck/}}}
-}
-
-@misc{AirpodsZk8,
-    author = {William Borgeaud},
-    title = {{Airpods}: Generalizing {AIR} to Multivariate Domains},
-    howpublished = {{zk8 Summit}},
-    year = {September 15, 2022},    
-    note = {{\url{https://www.youtube.com/watch?v=5hO9NbtFc0g&t=7565s}}}
-}
-
-@misc{HyperplonkZk8,
-    author = {Binyi Chen and Benedikt B{\"u}nz and Dan Boneh and Zhenfei Zhang},
-    title = {{Hyperplonk}: {PLONK} without FFTs and with High Degree Gates},
-    howpublished = {{zk8 Summit}},
-    year = {September 15, 2022},    
-    note = {{\url{https://www.youtube.com/watch?v=5hO9NbtFc0g&t=14592s}}}
-}
-%%
-%% Second wave SNARKs
-%%
-
 @INPROCEEDINGS{Sonic,
     author = {Mary Maller and Sean Bowe and Markulf Kohlweiss and Sarah Meiklejohn},
     title = {Sonic: Zero-Knowledge {SNARKs} from Linear-Size Universal and Updatable Structured Reference Strings},
@@ -720,6 +556,15 @@ https://solvable.group/posts/air-multivariate-sumcheck/
     note = {\url{https://eprint.iacr.org/2019/601}}
 }
 
+@INPROCEEDINGS{BuenzMaller,
+    author = {Benedikt B{\"u}nz and Mary Maller and Pratyush Mishra and Nirvan Tyagi and Psi Vesely},
+    title = {Proofs for Inner Pairing Products and Applications},
+    booktitle = {IACR preprint archive},
+    year = {2019},
+    pages = {117},
+    note = {\url{https://eprint.iacr.org/2019/1177}}
+}
+
 @inproceedings{Marlin,
   author    = {Alessandro Chiesa and Yuncong Hu and Mary Maller and Pratyush Mishra and Noah Vesely and Nicholas Ward},
   title     = {{Marlin}: Preprocessing {zkSNARKs} with Universal and Updatable {SRS}.},
@@ -729,7 +574,6 @@ https://solvable.group/posts/air-multivariate-sumcheck/
   series    = {LNCS},
   volume    = {12105},
   note = {Full paper: \url{https://eprint.iacr.org/2019/1047.pdf}},
-  doi = {10.1007/978-3-030-45721-1_26}
 }
 
 @inproceedings{Lunar,
@@ -740,18 +584,6 @@ https://solvable.group/posts/air-multivariate-sumcheck/
   note = {\url{https://eprint.iacr.org/2020/1069}}
 }
 
-@inproceedings{Fractal,
-  author    = {Alessandro Chiesa and Dev Ojha and Nicholas Spooner},
-  title     = {{Fractal}: Post-quantum and Transparent Recursive Proofs from Holography.},
-  booktitle = {EUROCRYPT 2020},
-  year      = {2020},
-  editor    = {},
-  series    = {LNCS},
-  volume    = {12105},
-  note = {Full paper: \url{https://eprint.iacr.org/2019/1076.pdf}},
-  doi = {10.1007/978-3-030-45721-1_27}
-}
-
 @INPROCEEDINGS{Starks,
     author = {Eli Ben-Sasson and Iddo Bentov and Yinon Horesh and Michael Riabzev},
     title = {Scalable, transparent, and post-quantum secure computational integrity},
@@ -759,7 +591,6 @@ https://solvable.group/posts/air-multivariate-sumcheck/
     year = {2018},    
     note = {\url{https://eprint.iacr.org/2018/046}}
 }
-
 
 @INPROCEEDINGS{Plonk,
     author = {Ariel Gabizon and Zachary J. Williamson and Oana Ciobotaru},
@@ -777,15 +608,337 @@ https://solvable.group/posts/air-multivariate-sumcheck/
     note = {{\url{https://www.coinresear.ch/snapshots/Gabizon2020a#videos}}}
 }
 
-@inproceedings{BootleChiesa,
-    author    = {Jonathan Bootle and Alessandro Chiasa and Katerina Sotiraki},
-    title     = {Sumcheck Arguments and their Applications},
-    booktitle = {IACR preprint archive 2021/333},
-    year = {2021},    
-    OPTlink = {\url{https://eprint.iacr.org/2021/333}}
+@INPROCEEDINGS{Plookup,
+    author = {Ariel Gabizon and Zachary J. Williamson},
+    title = {{Plookup}: A Simplified Polynomial Protocol for Lookup tables},
+    booktitle = {{IACR ePrint Archive} 2020/315},
+    year = {2020},    
+    note = {\url{https://eprint.iacr.org/2020/315}}
+}
+
+@misc{LookupsBlog,
+    author = {Ariel Gabizon},
+    title = {Multiset checks in {PLONK} and {Plookup}},
+    howpublished = {{hackmd.io}},
+    year = {2022},    
+    note = {{\url{https://hackmd.io/@arielg/ByFgSDA7D}}}
+}
+
+%%
+%% Univariate SNARKs, code IOPs
+%% 
+
+@inproceedings{ProofsProximity,
+	author = {Guy N. Rothblum and Salil Vadhan and Avi Wigderson},
+	title = {Interactive Proofs of Proximity: Delegating Computation in Sublinear Time},
+	booktitle = {IEEE Trans. on Information Theory},
+	volume = {45(6)},
+	year = {1999},
+	doi = {10.1145/2488608.2488709}
+}
+
+@inproceedings{FRI,
+	author = {Eli Ben-Sasson and Iddo Bentov and Yinon Horesh and Michael Riabzev},
+	title = {Fast {Reed-Solomon} Interactive Oracle Proofs of Proximity},
+	booktitle = {ICALP 2018},
+	year = {2018},
+	doi = {10.4230/LIPIcs.ICALP.2018.14},
+	note = {Full paper: \url{https://eccc.weizmann.ac.il/report/2017/134/}}
+}
+
+@inproceedings{FullyLinearPCPs,
+  author    = {Dan Boneh and Elette Boyle and Henry Corrigan-Gibbs and Yuval Ishai},
+  title     = {Zero-Knowledge Proofs on Secret-Shared Data via Fully Linear PCPs},
+  booktitle = {CRYPTO 2019},
+  pages     = {67--97},
+  year      = {2019},
+  series    = {LNCS},
+  volume    = {11694},
+  publisher = {Springer},
+  note = {Full paper:\url{https://eprint.iacr.org/2019/188.pdf}}
+}
+
+@inproceedings{DEEPFRI,
+	author = {Eli Ben-Sasson and Lior Goldberg and Swastik Kopparty and Shubhangi Saraf},
+	title = {{DEEP-FRI}: Sampling Outside the Box Improves Soundness},
+	booktitle = {ITCS 2020},
+	year = {2020},
+	doi = {10.4230/LIPIcs.ITCS.2020.5},
+	note = {Full paper: \url{https://eprint.iacr.org/2019/336}}
+}
+
+@inproceedings{ProximityGaps,
+	author = {Eli Ben-Sasson and Dan Carmon and Yuval Ishai and Swastik Kopparty and Shubhangi Saraf},
+	title = {Proximity Gaps for {Reed-Solomon} Codes},
+	booktitle = {FOCS 2020},
+	year = {2020},
+	doi = {10.1109/FOCS46700.2020.00088},
+	note = {Full paper: \url{https://eprint.iacr.org/2020/654}}
+}
+
+@inproceedings{Fractal,
+  author    = {Alessandro Chiesa and Dev Ojha and Nicholas Spooner},
+  title     = {{Fractal}: Post-quantum and Transparent Recursive Proofs from Holography.},
+  booktitle = {EUROCRYPT 2020},
+  year      = {2020},
+  series    = {LNCS},
+  volume    = {12105},
+  note = {Full paper: \url{https://eprint.iacr.org/2019/1076.pdf}},
+  doi = {10.1007/978-3-030-45721-1_27}
 }
 
 
+%%
+%% Multivariate SNARKs
+%%
 
+@INPROCEEDINGS{Sumcheck,
+    author = {Carsten Lund and Lance Fortnow and Howard Karloff and Noam Nisan},
+    title = {Algebraic Methods for Interactive Proof Systems},
+    booktitle = {Journal of the Association for Computing Machinery},
+    volume = {39}, 
+    year = {1992},
+    pages = {859--868},
+    note = {Full paper: \url{https://eprint.iacr.org/2017/1066}}
+}
+
+@INPROCEEDINGS{Muggles,
+    author = {Shafi Goldwasser and Yael Tauman Kalai and Guy N. Rothblum},
+    title = {Delegating Computation: Interactive Proofs for Muggles},
+    year = {2008},
+    booktitle = {{STOC`08}},
+    note = {\url{https://eprint.iacr.org/2022/1056}}
+}
+
+@INPROCEEDINGS{StreamingIOPs,
+    author = {Graham Cormode and Michael Mitzenmacher and Justin Thaler},
+    title = {Practical Verified Computation with Streaming Interactive Proofs},
+    booktitle = {ITCS 2012}, 
+    year = {2012},
+    %note = {Full paper: \url{}}
+}
+
+@INPROCEEDINGS{Meir,
+    author = {Or Meir},
+    title = {{IP = PSPACE} using Error-Correcting Codes},
+    booktitle = {{SIAM} Journal on Computing},
+    volume = {42}, 
+    year = {2013},
+    note = {Full paper: \url{https://eccc.weizmann.ac.il/report/2010/137}}
+}
+
+@INPROCEEDINGS{SettyBlumberg,
+    author = {Victor Vu and Srinath Setty and Andrew J. Blumberg and Michael Walfish},
+    title = {A Hybrid Architecture for Interactive Verifiable Computation},
+    booktitle = {IEEE Symposium on Security and Privacy},
+    series = {LNCS},
+    year = {2013},
+    %note = {Full paper: \url{}}
+}
+
+@INPROCEEDINGS{SumcheckThaler,
+    author = {Justin Thaler},
+    title = {Time-Optimal Interactive Proofs for Circuit Evaluation},
+    booktitle = {CRYPTO 2013},
+    series = {LNCS},
+    volume = {8043}, 
+    year = {2013},
+    note = {Full paper: \url{https://eprint.iacr.org/2013/351}}
+}
+
+@INPROCEEDINGS{TensorIOP,
+    author = {Jonathan Bootle and Andrea Cerulli and Essam Ghadafi and Jens Groth and Mohammad Hajiabadi and Sune K. Jakobsen},
+    title = {Linear-Time Zero-Knowledge Proofs for Arithmetic Circuit Satisfiability},
+    booktitle = {ASIACRYPT 2017},
+    series = {LNCS},
+    volume = {10626}, 
+    year = {2017},
+    note = {Full paper: \url{https://eprint.iacr.org/2017/872}}
+}
+
+@INPROCEEDINGS{ZkSumcheckPreprint,
+    author    = {Alessandro Chiesa and Michael A. Forbes and Nicholas Spooner},
+    title     = {A Zero Knowledge Sumcheck and its Applications},
+    booktitle = {IACR preprint archive 2017/305},
+    year = {2017},    
+    note = {\url{https://eprint.iacr.org/2017/305}}
+}
+
+@INPROCEEDINGS{Giraffe,
+    author = {Riad S. Wahby and Ye Ji and Andrew J. Blumberg and Abhi Shelat and Justin Thaler and Michael Walfish and Thomas Wies},
+    title = {Full Accounting for Verifiable Outsourcing},
+    booktitle = {CCS`17},
+    year = {2017},
+    note = {Full paper: \url{https://eprint.iacr.org/2017/242}}
+}
+
+@INPROCEEDINGS{Hyrax,
+    author = {Riad S. Wahby and Ioanna Tzialla and Abhi Shelat and Justin Thaler and Michael Walfish},
+    title = {Doubly-Efficient {zkSNARKs} without Trusted Setup},
+    booktitle = {CCS`17},
+    year = {2017},
+    note = {Full paper: \url{https://eprint.iacr.org/2017/242}}
+}
+
+@INPROCEEDINGS{Spartan,
+    author = {Srinath Setty},
+    title = {Spartan: Efficient and General-Purpose {zkSNARKs} without Trusted Setup},
+    booktitle = {CRYPTO 2020},
+    year = {2020},
+    note = {Full paper: \url{https://eprint.iacr.org/2019/550}}
+}
+
+@INPROCEEDINGS{Zhang,
+    author = {Jiaheng Zhang and Tianchen Xie and Yupeng Zhang and Dawn Song},
+    title = {Transparent Polynomial Delegation and Its Applications to Zero Knowledge Proof},
+    booktitle = {IEEE S\&P 2020}, 
+    year = {2020},
+    note = {Full paper: \url{https://eprint.iacr.org/2019/1482}}
+}
+
+@INPROCEEDINGS{Quarks,
+    author = {Srinath Setty and Jonathan Lee},
+    title = {Quarks: Quadruple-Efficient Transparent {zkSNARKs}},
+    booktitle = {{IACR ePrint Archive} 2020/1275},
+    year = {2020},
+    note = {\url{https://eprint.iacr.org/2020/1275}}
+}
+
+@INPROCEEDINGS{TensorCodes,
+    author = {Jonathan Bootle and Alessandro Chiesa and Jens Groth},
+    title = {Linear-Time Arguments with Sublinear Verification from Tensor Codes},
+    booktitle = {TCC 2020},
+    series = {LNCS},
+    volume = {12551}, 
+    year = {2020},
+    note = {Full paper: \url{https://eprint.iacr.org/2020/1426}}
+}
+
+@INPROCEEDINGS{TensorR1CS,
+    author = {Jonathan Bootle and Alessandro Chiesa and Siqi Liu},
+    title = {Zero-Knowledge {IOPs} with Linear-Time Prover and Polylogarithmic-Time Verifier},
+    booktitle = {EUROCRYPT 2022},
+    series = {LNCS},
+    volume = {13276}, 
+    year = {2020},
+    note = {Full paper: \url{https://eprint.iacr.org/2020/1527}}
+}
+
+@INPROCEEDINGS{SumcheckApplication,
+    author    = {Jonathan Bootle and Alessandro Chiasa and Katerina Sotiraki},
+    title     = {Sumcheck Arguments and their Applications},
+    booktitle = {CRYPTO 2021},
+    year = {2021},    
+    note = {Full paper: \url{https://eprint.iacr.org/2021/333}}
+}
+
+@INPROCEEDINGS{Gemini,
+    author = {Jonathan Bootle and Alessandro Chiesa and Yuncong Hu and Michele Orr`u},
+    title = {Gemini: Elastic {SNARKs} for Diverse Environments},
+    booktitle = {EUROCRYPT 2022},
+    year = {2022},
+    note = {Full paper: \url{https://eprint.iacr.org/2022/420}}
+}
+
+@INPROCEEDINGS{TensorR1CSarbitraryF,
+    author = {Jonathan Bootle and Alessandro Chiesa and Ziyi Guan and Siqi Liu},
+    title = {Linear-Time Probabilistic Proofs over Every Field},
+    year = {2022},
+    booktitle = {{IACR ePrint Archive} 2020/1056},
+    note = {\url{https://eprint.iacr.org/2022/1056}}
+}
+
+@INPROCEEDINGS{TensorRothblum,
+    author = {Justin Holmgren and Ron D. Rothblum},
+    title = {Faster Sounder Succinct Arguments and {IOP}s},
+    booktitle = {CRYPTO 2022},
+    series = {LNCS},
+    volume = {13507}, 
+    year = {2022},
+    note = {Full paper: \url{https://eprint.iacr.org/2022/994}}
+}
+
+@INPROCEEDINGS{Hyperplonk,
+    author = {Binyi Chen and Benedikt B{\"u}nz and Dan Boneh and Zhenfei Zhang},
+    title = {{Hyperplonk}: {PLONK} with a Linear-Time Prover and High-Degree Costum Gates},
+    booktitle = {{IACR ePrint Archive} 2020/1355},
+    year = {2022},
+    note = {\url{https://eprint.iacr.org/2022/1355}}
+}
+
+@misc{AirpodsZk8Blog,
+    author = {William Borgeaud},
+    title = {Proving {AIR} with multivariate sumchecks},
+    year = {May 21, 2022},    
+    note = {{\url{https://solvable.group/posts/air-multivariate-sumcheck/}}}
+}
+
+@misc{AirpodsZk8,
+    author = {William Borgeaud},
+    title = {{Airpods}: Generalizing {AIR} to Multivariate Domains},
+    howpublished = {{zk8 Summit}},
+    year = {September 15, 2022},    
+    note = {{\url{https://www.youtube.com/watch?v=5hO9NbtFc0g&t=7565s}}}
+}
+
+%%
+%% zk VMs, execution trace proving
+%%
+
+@INPROCEEDINGS{tinyRAMfullPaper,
+    author = {Eli Ben-Sasson and Alessandro Chiesa and Eran Tromer and Madars Virza},
+    title = {Succinct Non-Interactive Zero Knowledge for a {von Neumann} Architecture (rev. 8)},
+    booktitle = {{IACR ePrint Archive} 2013/879},
+    year = {2019},    
+    note = {\url{https://eprint.iacr.org/2013/879}}
+}
+
+@INPROCEEDINGS{tinyRAM,
+    author = {Eli Ben-Sasson and Alessandro Chiesa and Eran Tromer and Madars Virza},
+    title = {Succinct Non-Interactive Zero Knowledge for a {von Neumann} Architecture},
+    booktitle = {{23rd USENIX Security Symposium}},
+    year = {2014}
+}
+
+@misc{tinyRAMspecV0,
+  author = {Eli Ben-Sasson and Alessandro Chiesa and Daniel Genkin and Eran Tromer and Madars Virza},
+  title = {{TinyRAM} Architecture Specification v0.991},
+  booktitle = {SCIPR Lab},
+  year = {2013},
+  howpublished = {\url{http://www.scipr-lab.org/doc/TinyRAM-spec-0.991.pdf}},
+}
+
+@misc{tinyRAMspecV2,
+  author = {Eli Ben-Sasson and Alessandro Chiesa and Daniel Genkin and Eran Tromer and Madars Virza},
+  title = {{TinyRAM} Architecture Specification v2.000},
+  booktitle = {SCIPR Lab},
+  year = {2020},
+  howpublished = {\url{http://www.scipr-lab.org/doc/TinyRAM-spec-2.000.pdf}},
+}
+
+@INPROCEEDINGS{Arya,
+    author = {Jonathan Bootle and Andrea Cerulli and Jens Groth and Sune Jakobsen and Mary Maller},
+    title = {{Arya}: Nearly Linear-Time Zero-Knowledge Proofs for Correct Program Execution},
+    booktitle = {ASIACRYPT 2018},
+    series    = {LNCS},
+    volume    = {11272},
+    year = {2018},    
+    note = {Full paper: \url{https://eprint.iacr.org/2018/380}}
+}
+
+@INPROCEEDINGS{Cairo,
+  author = {Lior Goldberg and Shahar Papini and Michael Riabzev},
+  title = {{Cairo}-- a Turing-complete {STARK}-friendly CPU architecture},
+  booktitle = {{IACR ePrint Archive} 2021/1063},
+  year = {2021},
+  note = {\url{https://eprint.iacr.org/2021/1063}},
+}
+
+@misc{ConsensysZKVM,
+	author = {Olivier Bégassat and Alexandre Belling and Théodore Chapuis-Chkaiban and Nicolas Liochon},
+	title = {A specification for a {ZK-EVM}},
+	booktitle = {{ConsenSys, Applied R\&D Team}},
+	howpublished = {\url{https://ethresear.ch/uploads/short-url/3DM8kjFfIG6PHXu4qpYpmujXgme.pdf}}
+}
 
 

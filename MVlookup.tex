@@ -1,0 +1,1566 @@
+%\documentclass[10pt,a4paper,oneside]{article}
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+%\documentclass[11pt,article,oneside]{memoir} 
+%\usepackage[utf8]{inputenc}
+%\usepackage[T1]{fontenc}
+%\usepackage{lmodern}
+
+\documentclass[11pt]{article}
+
+%\usepackage[utf8]{inputenc}
+%\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage[total={7in,9in}]{geometry}
+\usepackage{graphicx}
+\usepackage{lmodern}
+\usepackage[bookmarks, colorlinks=false, pdftitle={Multivariate permutation Arguments}, pdfauthor={author}]{hyperref}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{tikz}
+\usepackage{titlesec}
+\usepackage{float}
+\usetikzlibrary{shapes, fit}
+\setcounter{tocdepth}{4}
+\setcounter{secnumdepth}{4}
+\setlength{\marginparwidth}{3cm}
+
+
+
+\usepackage{url}
+\usepackage{amsthm}
+\usepackage{mathrsfs}
+\usepackage{nicefrac}
+
+\usepackage[n,advantage,operators,sets,adversary,landau,probability,notions,logic,ff,mm,primitives,events, complexity,asymptotics,keys]{cryptocode}
+
+\usepackage{listings}
+\usepackage{footnote}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{%frame=tb,https://www.overleaf.com/project/608bc77c801b16bbadb2210a
+  language=sh,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+\RequirePackage{etex}
+
+% Theorem environments %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newtheorem{thm}{Theorem}[]
+\newtheorem*{thm*}{Theorem}
+\newtheorem{cor}{Corollary}[]
+\newtheorem{lem}[]{Lemma}
+\newtheorem{prop}[]{Proposition}
+\newtheorem{conj}[]{Conjecture}
+\newtheorem{protocol}[]{Protocol}
+
+\theoremstyle{definition}
+\newtheorem{defn}[thm]{Definition}
+\newtheorem*{defn*}{Definition}
+
+\theoremstyle{remark}
+\newtheorem{rem}[thm]{Remark}
+\newtheorem{rems}[thm]{Remarks}
+\newtheorem{rem*}[]{Remark}
+
+% MATH %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\Z}{\mathbb{Z}}
+\DeclareMathOperator{\N}{\mathbb{N}}
+\renewcommand{\PP}{\mathbf{P}}
+\newcommand{\OO}{\mathcal{O}}
+
+
+\DeclareMathOperator{\param}{\mathsf{Par}}
+\DeclareMathOperator{\gen}{\mathsf{Gen}}
+\DeclareMathOperator{\setup}{\mathsf{Setup}}
+\DeclareMathOperator{\indexer}{\mathsf{Index}}
+\DeclareMathOperator{\comm}{\mathsf{Com}}
+\DeclareMathOperator{\open}{\mathsf{Open}}
+\DeclareMathOperator{\prove}{\mathsf{Prove}}
+\DeclareMathOperator{\extract}{\mathsf{Extract}}
+\DeclareMathOperator{\simulate}{\mathsf{Sim}}
+\DeclareMathOperator{\RS}{\mathsf{RS}}
+\DeclareMathOperator{\FFT}{\mathsf{FFT}}
+\DeclareMathOperator{\Quotient}{\mathsf{Quotient}}
+\DeclareMathOperator{\agree}{\mathsf{agree}}
+
+\renewcommand{\adv}{\mathsf{Adv}}
+
+
+\author{%
+Ulrich Hab{\"o}ck
+\\\\
+Orbis Labs
+\\
+\texttt{team@orbislabs.com}
+}
+
+\begin{document}
+%\frontmatter
+\title{%
+Permutation and Lookup Arguments using 
+Logarithmic Derivatives  
+}
+\date{%
+\today
+}
+\maketitle
+
+%\setlength{\parskip}{5mm}
+
+
+\begin{abstract}
+This note presents a simple trick based on formal derivatives, which turns grand products into a grand sums, thus amenable to the  sumcheck protocol \cite{sumcheck}.
+Based on this trick, we construct tensor interactive oracle proofs for permutations and lookups over the boolean hypercube, and we compare them with state of the art protocols.
+While an overwhelmingly complete variant of the permutation proof has comparable costs to that of Hyperplonk \cite{Hyperplonk},  the lookup improves the one of Hyperplonk noticably, and outperforms any protocol based on the proof of shift from \cite{TensorR1CS}.
+%Second, we use our multivariate permutation proof to give a tensor interactive oracle proof for the satisfiability of arithmetic circuits in standard Plonk representation \cite{Plonk}.
+%Again, its prover is  linear in the circuit size. 
+%However, a paper-pencil count of field operations estimates the break-even point with the univariate prover at about $N=2^{28}$ constraints.
+% and adapted to fields of arbitrary size using the techniques )  
+%Our approach complements concurrent work on proving ``plonkish'' representations over multivariate domains \cite{HyperplonkZk8, AirpodsZk8}.
+%While these are able to prove transitional constraints and lookups by means of suitable affine linear mappings of $F^{\log{N}}$, their approach apply only to multi-circuit proofs with each circuit consuming about $\sqrt N$ many constraints. 
+%(We need to find out if that is true for Hyperplonk, too)  
+%
+%We expect that this is the technique used by B{\"u}nz et al., for their ``Hyperplonk'' advertised at the zk8 summit in Berlin, Sep. 2022.
+\end{abstract}
+
+%Keywords: SNARKs, recursive proofs, aggregation scheme
+
+%\begin{KeepFromToc}
+ \tableofcontents
+%\end{KeepFromToc}
+
+%\mainmatter
+%\section{Introduction}
+
+\section{Preliminaries}
+
+\subsection{The Lagrange kernel of the boolean hypercube}
+
+Let $F$ denote a finite field, and $F^*$ its multiplicative group.
+Throughout the document we regard the boolean hypercube 
+\[
+H= \{\pm 1\}^n
+\] 
+as a multiplicative subgroup of  $(F^*)^n$.
+For a multivariate polynomial $p(X_1,\ldots, X_n)\in F[X_1,\ldots, X_n]$, we will often use the vector notation $\vec X = (X_1,\ldots, X_n)$ for its arguments, writing 
+\[
+p(\vec X) := p(X_1,\ldots, X_n).
+\] 
+
+%Given a function $f: H\rightarrow F$, its \textit{Langrange interpolation} is the unique multilinear polynomial $p(\vec X)$ in $\vec X = (X_1,\ldots, X_n)$ such that $p(\vec x) = f(\vec x)$ for every $\vec x\in H$.
+%As $H$ has an increasing sequence of subgroups $\{1\} = H_0\subset H_1 \subset \ldots \subset H_n = H$, each $H_i$ having order $|H_i| = 2^i$,  Lagrange interpolation can be done in only $2^n$ field multiplications\footnotemark and $n\cdot 2^n$ additions and substractions, compared to $n\cdot 2^{n-1}$ multiplications and additions as for univariate interpolation from order $2^n$ subgroups of $F^*$.
+%\footnotetext{%
+%The field multiplications are due to the normalization of $f$ by the factor $\frac{1}{2^n}$, and can be entirely omitted an IOP. 
+%One ``commits'' to the non-normalized Lagrange interpolant and corrects the queried evaluations.
+%}%
+%See Appendix \ref{s:Appendix} for details. 
+
+The \textit{Lagrange kernel} of $H$ is the multilinear polynomial
+\begin{equation}
+\label{e:LagrangeKernel}
+L_H(\vec X, \vec Y)  = \frac{1}{2^n}\cdot \prod_{j=1}^n (1 + X_j\cdot Y_j).
+\end{equation}
+Notice that $L_H(\vec X, \vec Y)$ is symmetric, i.e. $L_H(\vec X, \vec Y)=L_H(\vec Y, \vec X)$, and that the product representation \eqref{e:LagrangeKernel} allows for evaluating with only $\bigO{\log|H|}$ field operations.
+Whenever $\vec y \in H$ we have that $L_H(\vec X, \vec y)$ is the Lagrange polynomial on $H$, i.e. the unique multilinear polynomial which satisfies $L_H(\vec x, \vec y) = 1$ at $\vec x = \vec y$, and zero elsewhere on $H$.
+In particular for any function $f: H\longrightarrow F$  we have the inner product evaluation formula 
+\[
+\left\langle f ,L_H(\:.\:, \vec y)\right\rangle_H := \sum_{x\in H} f(\vec x) \cdot L_H(\vec x, \vec y) = f(\vec y).
+\]
+for every  $\vec y\in H$.
+This property extends beyond $H$, as the following Lemma shows.
+\begin{lem}
+\label{lem:Lagrange}
+Let $p(\vec X)$ be the unique multilinear extension of $f: H\rightarrow F$. 
+Then for every $\vec y\in F^n$,
+\begin{equation}
+\label{e:LagrangeScalarProduct}
+\left\langle f ,L_H(\:.\:, \vec y)\right\rangle_H = \sum_{x\in H} f(\vec x) \cdot L_H(\vec x, \vec y) = p(\vec y).
+\end{equation}
+\end{lem}
+\begin{proof}
+%This is straight forward from the Lagrange representation $p(X)=\sum_{\vec z\in H} f(\vec z) \cdot L_H(\:.\:, \vec z)$.
+Since $p(\vec y) = \sum_{\vec x\in H} f(\vec z)\cdot L_H(\vec X,\vec z)$, it suffices to show the claim for $p(X) = L_H(\vec X,\vec z)$, with $\vec z\in H$.
+By the property of $L_H(\vec X,\vec z)$, we have $\big\langle L_H(\:.\:, \vec z), L_H(\:.\:,\vec y) \big\rangle_H =L_H(\vec y,\vec z)$, which by symmetry is equal to $L_H(\vec X,\vec y)$ at $\vec X=\vec z$.
+This completes the proof of the Lemma.
+\end{proof}
+
+We will use the Lagrange kernel to reduce domain equalities over $H$ to sumchecks. 
+This is tantamount to the tensor-query to point-query paradigm from \cite{TensorIOP} used in a line of work, e.g. \cite{TensorCodes, TensorR1CS, TensorRothblum, TensorR1CSarbitraryF}.
+
+\begin{rem}
+\label{rem:Lagrange}
+Note that for any $\vec y\in F^n$, the domain evaluation of $L_H(\vec X, \vec y)$ over $H$ can be computed in 
+$\bigO{|H|}$ field operations, by recursively computing the domain evaluation of the partial products $p_k(X_1,\ldots, X_k, y_1,\ldots, y_k)= \frac{1}{2^n}\cdot \prod_{j=1}^k (1 + X_j\cdot y_j)$ over $H_k =\{\pm 1\}^k$ from the domain evaluation of $p_{k-1}$, where one starts with $f_0 = \frac{1}{2^n}$ over the single-point domain $H_0$.
+Each recursion step costs $|H_{k-1}|$ field multiplications $\mathsf M$ and the same number of additions $\mathsf A$,  
+yielding overall
+\begin{equation*}
+\sum_{k=1}^{n} |H_{k-1}| \cdot (\textsf M + \textsf A) < |H| \cdot  (\textsf M + \textsf A).
+\end{equation*}
+As a consequence, Lemma \ref{lem:Lagrange} shows that multilinear polynomials can be evaluated in linear time from their domain evalution over $H$.
+\end{rem}
+
+
+
+\subsection{The formal derivate}
+
+Given a univariate polynomial $p(X) =\sum_{k=0}^{d} c_k\cdot X^k$ over a (possibly infinite) field $F$, its \textit{derivative} is defined as 
+\begin{equation}
+\label{e:DerivativePoly}
+p'(X) := \sum_{k=1}^{d} k \cdot c_k \cdot X^{k-1}.
+\end{equation}
+The derivative is linear, i.e. for every two polynomials $p_1(X), p_1(X)\in F[X]$, and coefficients $\lambda_1,\lambda_2\in F$,
+\begin{equation}
+\label{e:DerivativeLinear}
+(\lambda_1 \cdot p_1(X) + \lambda_2 \cdot p_1(X))' = \lambda_1\cdot p_1'(X) + \lambda_2\cdot p_2'(X)
+\end{equation}
+ and we have the product rule
+\begin{equation}
+\label{e:ProductRule}
+(p_1(X)\cdot p_2(X))' = p_1'(X)\cdot p_2(X) + p_1(X)\cdot p_2'(X).
+\end{equation}
+For a function $\frac{p(X)}{q(X)}$ from the rational function field $F(X)$, the derivative is defined as the rational function
+\begin{equation}
+\label{e:DerivativeQuotient}
+\left(\frac{p(X)}{q(X)}\right)' := \frac{p'(X)\cdot q(X) - p(X)\cdot q'(X)}{q(X)^2}.
+\end{equation}
+Note that by the product rule for polynomials, the definition does not depend on the representation of $\frac{p(X)}{q(X)}$.
+Both linearity as well as the product rule extend to rational functions. 
+%For a proof of these facts, as well as alternative definitions for the formal derivative, we refer to standard literature. 
+
+For any polynomial $p(X)\in F[X]$, if $p'(X)=0$ then $p(X)= g(X^p)$ where $p$ is the characteristic of the field $F$.
+In particular, if $\deg p(X) < p$, then the polynomial must be constant.
+As facts on the kernel of the derivative in $F(X)$ are not as commonly known, we give a proof of the following lemma.
+
+\begin{lem}
+\label{lem:DerivativeFraction}
+Let  $F$ be a field of characteristic $p\neq 0$, and $\frac{p(X)}{q(X)}$ a rational function over $F$ with both  $\deg p(X) < p$ and $\deg q(X) < p$.
+If the formal derivative $\left(\frac{p(X)}{q(X)}\right)' = 0$, then $\frac{p(X)}{q(X)} = c$ for some constant $c\in F$.
+\end{lem}
+
+\begin{proof}
+If $q(X)$ is a constant, then the assertion of the Lemma follows from the corresponding statement for polynomials.
+Hence we assume that $\deg q(X)>0$.
+Use polynomial division to obtain the representation
+\[
+\frac{p(X)}{q(X)} = m(X) + \frac{r(X)}{q(X)},
+\]
+with $m(X), r(X) \in F[X]$, $\deg m(X) \leq \deg p(X)$, and $\deg r(X) < \deg q(X)$ whenever $r(X)\neq 0$.
+By linearity of the derivative, we have
+$
+0 =  \left(\frac{p(X)}{q(X)}\right)' = m'(X) + \left(\frac{r(X)}{q(X)}\right)',
+$
+and therefore
+%\[
+%\frac{r'(X)\cdot q(X) - r(X)\cdot q'(X)}{q(X)^2} = - m'(X)
+%\]
+\begin{equation}
+\label{e:der}
+r'(X)\cdot q(X) - r(X)\cdot q'(X) = - m'(X)\cdot q(X)^2.
+\end{equation}
+Comparing the degrees of left and right hand side in \eqref{e:der}, we conclude that  $m'(X) = 0$.
+Since $\deg m(X) \leq  \deg p(X) < p$ we have $m(X)= c$ for some constant\footnotemark $c\in F$. 
+\footnotetext{%
+For general degrees of $p(X)$ we would only be able to conclude that $m(X) = g(X^p)$ for some polynomial $g(X)$. 
+}% 
+Furthermore, if we had $r(X)\neq 0$ then the leading term of the left hand side in \eqref{e:der} would be
+\[
+%m\cdot d_m \cdot X^{m-1}\cdot c_n \cdot X^n + d_m \cdot X^{m-1}\cdot n\cdot  c_n \cdot X^{n-1} = 
+(k - n) \cdot c_n\cdot d_{k} \cdot X^{n + k - 1},
+\]
+with $c_n \cdot X^n$, $n>0$, being the leading term of $q(X)$, and  $d_k \cdot X^k$, $0\leq k < n$, the leading term of $r(X)$.
+As  $0 < n - k < p$, and both $c_n\neq 0$ and $c_m\neq 0$, the leading term of the left hand side of \eqref{e:der} would not vanish.
+Therefore it must hold that  $r(X) = 0$ and the proof of the lemma is complete.
+\end{proof}
+
+
+\subsection{The  logarithmic derivative}
+
+We define the \textit{logarithmic derivate} of a polynomial $p(X)$ over a field $F$ as the rational function
+\begin{equation}
+\frac{p'(X)}{p(X)}.
+\end{equation}
+Note that the logarithmic derivative of the product $p_1(X)\cdot p_2(X)$ of two polynomials $p_1(X), p_2(X)$ equals the sum of their logarithmic derivatives, since by the product rule we have 
+\[
+\frac{(p_1(X)\cdot p_2(X))'}{p_1(X)\cdot p_2(X)} = \frac{p_1'(X)\cdot p_2(X) + p_1(X)\cdot p_2'(X)}{p_1(X)\cdot p_2(X)} 
+= \frac{p_1'(X)}{p_1(X)} + \frac{p_2'(X)}{p_2(X)}.
+\]
+In particular the logarithmic derivative of a product $p(X) = \prod_{i=1}^n (X + z_i)$, with each $z_i\in F$, is equal to the sum
+\begin{equation}
+\label{e:LogDerivativeProduct}
+\frac{p'(X)}{p(X)} %= \sum_{i=1}^n \frac{\prod_{j\in \{1,\ldots, n\}\setminus \{i\}} (X - z_j) }{p(X)} 
+= \sum_{i=1}^n \frac{1}{X + z_i}.
+\end{equation}
+
+The following lemma is a simple consequence of Lemma \ref{lem:DerivativeFraction} and essentially states that, under quite mild conditions on the field $F$, if two normalized polynomials have the same logarithmic derivative then they are equal. 
+We state this fact for our use case of product representations.
+\begin{lem}
+\label{lem:LogarithmicDerivative}
+Let $(a_i)_{i=1}^n$ and $(b_i)_{i=1}^n$ be sequences  over a field $F$ with characteristic $p > n$. 
+Then
+\begin{equation}
+\label{e:d}
+\prod_{i=1}^n \left(X + a_i \right) =\prod_{i=1}^n \left(X + b_i \right)
+\end{equation}
+in $F[X]$ if and only if  
+\begin{equation}
+\label{e:LogDerivativeSum}
+\sum_{i=1}^n \frac{1}{X + a_i} =\sum_{i=1} ^n\frac{1}{X + b_i}
+\end{equation}
+in the rational function field $F(X)$.
+\end{lem}
+
+\begin{proof}
+If  $p_a(X) = \prod_{i=1}^n \left(X + a_i\right)$ and $p_b(X) = \prod_{i=1}^n \left(X + b_i\right)$
+coincide, so do their logarithmic derivatives.
+To show the other direction, assume that 
+\[
+\frac{p_a'(X)}{p_a(X)}  = \frac{p_b'(X)}{p_b(X)}
+\]
+Then $p_a'(X)\cdot p_b(X) - p_a(X)\cdot  p_b'(X) = 0$. 
+By the definition of formal derivatives for rational functions,  
+\[
+\left(\frac{p_a(X)}{p_b(X)}\right)'  = \frac{p_a'(X)\cdot p_b(X) - p_a(X)\cdot  p_b'(X)} {p_b^2(X)} = 0.
+\]
+Hence by Lemma \ref{lem:DerivativeFraction} we have $\frac{p_a(X)}{p_b(X)} = c$ for some constant  $c \in F$.
+As both $p_a(X)$ and $p_b(X)$ have leading coefficient equal to $1$, we conclude that $c =1$, and the proof of the Lemma is complete.
+\end{proof}
+\begin{rem}
+\label{rem:LogarithmicDerivativeFunctionField}
+We stress the fact that Lemma \ref{lem:LogarithmicDerivative} also applies to the case where $F$  is the function field $F_p(Y_1,\ldots, Y_k)$ over a finite field $F_p$ of characteristic $p$.
+This observation will be useful when generalizing the permutation argument to the case where $a_i$ and $b_i$ are multilinear polynomials in $Y_1, \ldots, Y_n$.
+\end{rem}
+
+Another useful property of the logarithmic derivative of a product $f(X)=\prod_{i=1}^N (X + a_i)$ is that
+\begin{align*}
+\frac{f(X)}{f'(X)} = \sum_{a\in A} \frac{m(a)}{X + a},
+\end{align*}
+where $A$ is the set comprised of all $a_i$, $i=1,\ldots, N$,  and $m(a)\in \{1,\ldots, N\}$ is the multiplicity of each $a\in A$ occoring in $(a_i)_{i=1}^N$.
+This leads to the following algebraic criterion for batch set membership.
+\begin{lem}[Batch set membership]
+\label{lem:batchsetmembership}
+Let $F$ be a field of characteristic $p>N$, and suppose that $(a_i)_{i=1}^N$, $(b_i)_{i=1}^N$ are arbitrary sequences of field elements.
+Then $\{a_i \}\subseteq \{b_i\}$ as sets (with multiples of values removed), if and only if there exists a sequence $(m_i)_{i=1}^N$ of field elements such that
+\begin{equation}
+\label{e:fracs}
+\sum_{i=1}^N \frac{1}{X + a_i} = \sum_{i=1}^N \frac{m_i}{X + b_i}  
+\end{equation}
+in the function field $F(X)$.
+\end{lem}
+
+The proof of Lemma \ref{lem:batchsetmembership}, which is given below, is an immediate consequence of the uniqueness of fractional representations
+\[
+\sum_{z \in \mathcal Z} \frac{c(z)}{X - z},
+\]
+$\mathcal Z\subseteq F$, as shown by the following auxilary lemma.
+\begin{lem}
+\label{lem:UniqueFractionalRep}
+Let $F$ be an arbitrary field and $\mathcal Z\subseteq F$, and let $m_1, m_2$ be any functions from $\mathcal Z$ into $F$.
+Then
+\begin{equation}
+\label{e:LaurentRepZero}
+\sum_{z\in\mathcal Z} \frac{m_1(z)}{X - z} = \sum_{z\in\mathcal Z} \frac{m_2(z)}{X - z}
+\end{equation}
+in the rational function field $F(X)$, if and only if $m_1(z)=m_2(z)$ for every $z\in \mathcal Z$.
+\end{lem}
+\begin{proof}
+Suppose that \eqref{e:LaurentRepZero} holds.  
+Then $\sum_{z\in\mathcal Z} \frac{m_1(z)-m_2(z)}{X - z} = 0$, and therefore
+\[
+p(X) = \prod_{w\in\mathcal Z} (X - w)\cdot\sum_{z\in\mathcal Z} \frac{m_1(z)-m_2(z)}{X - z} = \sum_{z\in\mathcal Z} (m_1(z)-m_2(z))\cdot \prod_{w\in\mathcal Z\setminus\{z\}} (X - w) = 0.
+\]
+In particular,
+\[
+p(z) = (m_1(z) - m_2(z)) \cdot  \prod_{w\in\mathcal Z\setminus\{z\}} (z - w)= 0
+\]
+for every $z\in\mathcal Z$.
+Since   $\prod_{w\in\mathcal Z\setminus\{z\}} (z - w) \neq 0$ we must have $m_1(z)  = m_2(z)$ for every $z\in\mathcal Z$. 
+The other direction is obvious.
+\end{proof}
+
+
+\begin{proof}[Proof of Lemma \ref{lem:batchsetmembership}]
+Let us denote by $A=\{a_i\}$ the set of all $a_i$ occuring in the sequence $(a_i)_{i=1}^N$, and let us write 
+$m_A(a)$ the multiplicity of $a$.
+Likewise, we do for $B=\{b_i\}$.
+Note that since $N < p$, the multiplicities can be regarded as non-zero elements from $F$.
+
+Suppose that $A\subseteq B$. 
+Set 
+\[
+m_i = 
+\begin{cases}
+\frac{m_A(b_i)}{m_B(b_i)} & \text{if }b_i\in A,
+\\
+0 &\text{otherwise}.
+\end{cases}
+\]
+This choice of $(m_i)$ obviously satisfies \eqref{e:fracs}.
+
+Conversely, suppose that \eqref{e:fracs} holds.
+Collecting fractions with the same denominator we obtain fractional representations for both sides of the equation \eqref{e:fracs},  
+\begin{align*}
+f(X) = \sum_{i=1}^N \frac{1}{X + a_i} &= \sum_{z\in A\cup B} \frac{m_f(z)}{X + z},
+\\
+g(X) = \sum_{i=1}^N \frac{m_i}{X + b_i} & = \sum_{z\in A\cup B} \frac{m_g(z)}{X + z}.
+\end{align*}
+Note that since $N < p$, we know that for each $z\in A$ we have $m_f(z)\neq 0$. 
+By the uniqueness of fractional representations,  Lemma \ref{lem:UniqueFractionalRep}, $m_g(z) = m_f(z)$ for every $z\in A$, and therefore each $z\in A$ must occur also in $B$. 
+\end{proof}
+
+
+\subsection{Tensor interactive oracle proofs (TODO)}
+
+\subsection{The sumcheck protocol}
+
+For the sake of completeness we give a concise summary on the sumcheck protocol \cite{sumcheck} for multivariate polynomials.
+Given a multivariate polynomial $p(X_1,\ldots, X_n)\in F[X_1,\ldots, X_n]$, a prover wants to convince the verifier upon that
+\begin{equation*}
+s = \sum_{(x_1,\ldots, x_n) \in \{\pm 1\}^n} p(x_1, \ldots, x_n).
+\end{equation*}
+This is done by a random folding procedure which, starting with $H_0=\{\pm 1\}^n$, which stepwise reduces a claim on the sum over $H_i = \{\pm 1\}^{n-i}$, $i=0,\ldots, n-1$, to one over the hypercube $H_{i+1}$ of half the size. 
+Eventually, one ends up with a claim over a single-point sum, which is paraphrased as the value of $p(X_1,\ldots, X_n)$ at a random point $(r_1,\ldots, r_n)\in F^n$ sampled in the course of the reduction steps.
+
+%The reduction principle is best explained in the case of multilinear polynomials $p(X_1,\ldots, X_n)$.
+%In the first round the prover provides the values of the partial sums
+%\[
+%s_1(x_1) = \sum_{(x_2,\ldots, x_n) \in \{\pm 1\}^{n-1}} p(x_1, x_2, \ldots, x_n),
+%\]
+%for $x_1\in\{\pm 1\}$, which the verifier checks to sum up to the claimed value, i.e. $v= s_1(-1) + s_1(+1)$. 
+%If so,  the verifier samples a random $r_1\sample F$ and both prover and verifier continue on the protocol on the linear combination
+%\begin{align*}
+%r_1 \cdot s_1(+1) + (1 - r_1) \cdot s_1(-1) &= r_1\cdot\hspace*{-1cm}\sum_{(x_2,\ldots, x_n) \in \{\pm 1\}^{n-1}}  p( +1 , x_2, \ldots, x_n) +  (1-r_1)\cdot\hspace*{-1cm}\sum_{(x_2,\ldots, x_n) \in \{\pm 1\}^{n-1}}  p( -1 , x_2, \ldots, x_n)
+%\\
+%&= \sum_{(x_2,\ldots, x_n) \in \{\pm 1\}^{n-1}} p(r_1 , x_2, \ldots, x_n),
+%\end{align*}
+%where the latter equality holds as $p(X_1,\ldots, X_n)$ is a linear polynomial in $X_1$.
+%After $n$ reduction steps of this kind, the initial claim is eventually reduced to the evaluation claim for $p(X_1,\ldots, X_n)$ at 
+%$(X_1,\ldots, X_n) = (r_1, \ldots, r_n)$.
+ 
+%\begin{protocol}[Sumcheck protocol, \cite{sumcheck}]
+%Let $p(X_1,\ldots, X_n)$ be a multivariate polynomial over a finite field $F$. %with individual degrees $d_i=\deg_{X_i} p(X_1,\ldots, X_n)$.
+%The sumcheck protocol, in which a prover wants to convince the verifier upon the sum $s = \sum_{(x_1,\ldots, x_n) \in \{\pm 1\}^n} p(x_1, \ldots, x_n)$, is as follows.
+%\begin{itemize}
+%\item 
+%In the first round $i=1$, the prover sends (the coefficients of) the univariate polynomial 
+%\[
+%s_1(X) = \sum_{(x_{2},\ldots, x_n) \in \{\pm 1\}^{n-1}} p(X ,x_{2}, \ldots, x_n)
+%\]
+%of degree $d_1\leq \deg_{X_1} p(X_1,\ldots, X_n)$, to the verifier.
+%%(This polynomial is computed in linear time from its values over a set $D_1\supseteq \{\pm 1\}$ of size $|D_1| = d_1 + 1$.) 
+%The verifier checks if 
+%\[
+%v = s_1(-1) + s_1(+1),
+%\] 
+%and if so it responds with a random challenge $r_1$ sampled uniformly from $F$.
+%
+%\item
+%In each of the further rounds $i=2,\ldots, n$, the prover sends the univariate polynomial of degree $d_i \leq \deg_{X_i} p(X_1,\ldots, X_n)$ given by
+%\[
+%s_i(X) = \sum_{(x_{i+1},\ldots, x_n) \in \{\pm 1\}^{n-i}} p(r_1,\ldots, r_{i-1},X ,x_{i+1}, \ldots, x_n),
+%\]
+%where $r_1, \ldots, r_{i-1}$ are the randomnesses received in the previous rounds.
+%%(Again, the computation is done by interpolation from the values over a set $D_i\supseteq \{\pm 1\}$ of size $|D_i| = d_i + 1$.)
+%The prover sends the coefficients of $s_{i}(X)$ to the verifier, which checks whether 
+%\[
+%s_{i-1}(r_{i-1}) = s_{i}(+1) + s_{i}(-1).
+%\] 
+%If so, the verifier sends another random challenge $r_i\sample F$ to the prover.
+%\end{itemize}
+%After these rounds the verifier checks if $s_n(r_n) = p(r_1,\ldots, r_n)$. 
+%If so, the verifier accepts (otherwise it rejects).  
+%\end{protocol}
+
+\begin{protocol}[Sumcheck protocol, \cite{sumcheck}]
+\label{p:Sumcheck}
+Let $p(X_1,\ldots, X_n)$ be a multivariate polynomial over a finite field $F$. %with individual degrees $d_i=\deg_{X_i} p(X_1,\ldots, X_n)$.
+The sumcheck protocol, in which a prover wants to convince the verifier upon the sum $s = \sum_{(x_1,\ldots, x_n) \in \{\pm 1\}^n} p(x_1, \ldots, x_n)$, is as follows.
+We write $s_0(X)$ for the constant polynomial $s_0 =s$.
+\begin{itemize}
+\item
+In each round $i=1,\ldots, n$, the prover sends the coefficients of the univariate polynomial 
+\[
+s_i(X) = \sum_{(x_{i+1},\ldots, x_n) \in \{\pm 1\}^{n-i}} p(r_1,\ldots, r_{i-1},X ,x_{i+1}, \ldots, x_n),
+\]
+of degree $d_i \leq \deg_{X_i} p(X_1,\ldots, X_n)$, where $r_1, \ldots, r_{i-1}$ are the randomnesses received in the previous rounds. (In the first round $i=1$ there are no previous randomnesses, and $p(r_1,\ldots, r_{i-1},X ,x_{i+1}, \ldots, x_n)$ is meant to denote $p(X,x_2,\ldots, x_n)$.)
+%(Again, the computation is done by interpolation from the values over a set $D_i\supseteq \{\pm 1\}$ of size $|D_i| = d_i + 1$.)
+The prover sends the coefficients of $s_{i}(X)$ to the verifier, which checks whether the received polynomial $s_i(X)$ is in fact of the expected degree and that
+\[
+s_{i-1}(r_{i-1}) = s_{i}(+1) + s_{i}(-1).
+\] 
+(Again, in the first round $i=1$ there is no $r_0$, and the verifier checks wheather $s_0 = s_1(+1) + s_1(-1)$.) 
+If so, the verifier samples random challenge $r_i\sample F$ uniformly from $F$ and sends it to the prover.
+\end{itemize}
+After these rounds the verifier checks that $s_n(r_n) = p(r_1,\ldots, r_n)$. 
+If so, the verifier accepts (otherwise it rejects).  
+\end{protocol}
+
+
+Soundness of the sumcheck protocol is proven by a repeated application of the Schwartz-Zippel lemma. 
+We omit a proof, and refer to \cite{sumcheck} or \cite{SumcheckThaler}. 
+\begin{thm}[\cite{sumcheck}]
+The sumcheck protocol (Protocol \ref{p:Sumcheck}) has soundness error
+\begin{equation}
+\label{e:SumcheckSoundness}
+\varepsilon_{sumcheck} \leq \frac{1}{|F|}\cdot \sum_{i=1}^n \deg_{X_i} p(X_1,\ldots, X_n).
+\end{equation}
+\end{thm}
+\begin{rem}
+\label{rem:BatchedSumcheck}
+The sumcheck protocol is easily extended to the sumcheck for a batch of polynomials $p_i(X_1,\ldots, X_n)$, $i=0, \ldots, L$, by letting the verifier sample a random vector $(\lambda_1,\ldots, \lambda_L)\sample F^L$, and a subsequent sumcheck protocol for the random linear combination
+\[
+\bar p (X_1, \ldots, X_n) = p_0(X_1,\ldots, X_n) + \sum_{i=1}^{L} \lambda_i \cdot p_i(X_1,\ldots, X_n).
+\]
+The soundness error bound increases only slightly,
+\begin{equation}
+\label{e:BatchSumcheckSoundness}
+\varepsilon_{sumcheck} \leq \frac{1}{|F|}\cdot \left(1 + \sum_{i=1}^n \deg_{X_i} p(X_1,\ldots, X_n)\right).
+\end{equation}
+\end{rem}
+
+%\begin{rem}
+Let us discuss the prover cost of Protocol \ref{p:Sumcheck} for the case that  $p(\vec X) = p(X_1,\ldots, X_n)$ is of the form
+\[
+p(\vec X) = Q(w_1(\vec X), \ldots, w_m(\vec X)),
+\]
+with each $w_i(\vec X)\in F[X_1,\ldots, X_n]$ being multilinear, and 
+\[
+Q(Y_1,\ldots, Y_m) = \sum_{(i_1,\ldots, i_m)\in \{0,1\}^m} c_{i_1,\ldots, i_m} \cdot Y_1^{i_1}\cdots Y_m^{i_m}
+\]
+ is a multivariate polynomial having (a typically low) absolute degree $d$.
+We denote the arithmetic complexity, i.e. the number of field multiplications $\mathsf M$, substractions $\mathsf S$ and additions $\mathsf A$ to evaluate $Q$ by $|Q|_\textsf M$, $|Q_\textsf S|$ and $|Q|_\textsf A$, respectively.
+Each of the univariate polynomials $s_i(X)$, $i=1,\ldots, n$, is of degree at most $d$ the absolute degree of $Q$, and is computed from its values over a set $D\supseteq \{\pm 1\}$ of  size $|D| = d + 1$.
+In each step $i=1,\ldots, n$, the values of $s_i(z)$ for $z\in D$ are obtained by linear interpolation of the domain evaluations of each
+\[
+w_j (r_1,\ldots, r_{i-1}, \pm 1, X_{i+1}, \ldots, X_n)
+\]
+over $H_{i}=\{\pm 1\}^{n-i}$ as given from the previous step, to the domain evaluation
+\[
+w_j (r_1,\ldots, r_{i-1}, z, X_{i+1}, \ldots, X_n), 
+\]
+the values of which are used for computing $s_i(z) = \sum_{(x_{i+1},\ldots, x_n)\in H_{i}} Q(r_1,\ldots, r_{i-1}, z, x_{i+1}, \ldots, x_n)$.
+Given the random challenge $r_i$ from the verifier, the domain evaluation of each   
+\[
+w_j(r_1,\ldots, r_{i-1}, r_i, X_{i+1},\ldots, X_n)
+\]
+is computed by another linear interpolation.
+Linear interpolation costs $|H_i|$ multiplications and the same number of additions/substractions for each multilinear polynomial, the values of $Q$ are obtained within $|Q|_\textsf M \cdot \textsf{M} +   |Q|_\textsf S \cdot \textsf S + |Q|_\textsf A \cdot \textsf A$.  
+In terms of field multiplications $\mathsf M$, substractions $\mathsf S$ and additions $\mathsf A$, step $i$ consumes 
+% Interpolation of m multilinear polynomials for |D_i| - 2 + 1 many points:
+%     m*  |H_i| S for the differences
+%     m * (|D_i| - 2) * |H_i| (M + A) for the domain evals for every z in D_i \setminus\{\pm 1\} 
+%     m * |H_i| (M + A) for the domain eval at r_i
+% Domain evaluation for Q at each point in D_i
+%   |D_i| * |H_i| * (Q_M * M + Q_S * S + Q_A * A)
+% Sum over |H_i| for Q at each point z in D_i
+%  |D_i| * |H_i| * A
+\begin{align*}
+m\cdot |H_i|\cdot \textsf S + m \cdot (|D| - 1)\cdot |H_{i}| \cdot (\textsf M  + \textsf A)
++  |D|\cdot |H_{i}| \cdot ( |Q|_\textsf M \cdot \textsf{M} +   |Q|_\textsf S \cdot \textsf S + |Q|_\textsf A \cdot \textsf A) 
++ |D|\cdot |H_{i}| \cdot \textsf A
+%\\
+%< |D|  \cdot |H_{i}| \cdot \big((m + |Q|_M)\cdot\textsf M +  (m+ |Q|_\textsf S) \cdot\textsf S + (m + |Q|_\textsf A + 1)\cdot \textsf A\big).
+\end{align*}
+Since $\sum_{i=1}^{n} |H_{i}| < |H_0| = |H|$, the overall cost for the prover is bounded by 
+\begin{equation}
+\label{e:SumcheckCost}
+|H|\cdot (d + 1) \cdot \big( (m + |Q|_\textsf M)\cdot\textsf M +
+(m + |Q|_\textsf S)\cdot\textsf S +
+(m + |Q|_\textsf A + 1)\cdot\textsf A
+\big),
+\end{equation}
+where $d$ is the absolute degree of $Q$.
+This is an $\bigO{|H|}$ of field operations.
+When making detailed comparisons, we will use the precise formula
+\begin{equation}
+\label{e:SumcheckCostPrecise}
+|H|\cdot \left(1-\frac{1}{2\cdot |H|}\right)\cdot \big( (d\cdot m + (d+1)\cdot |Q|_\textsf M)\cdot\textsf M +
+ m\cdot |Q|_\textsf S \cdot\textsf S +
+(d\cdot m + (d+1)\cdot (|Q|_\textsf A + 1))\cdot\textsf A
+\big).
+\end{equation}
+
+
+\section{Permutation proofs over the boolean hypercube}
+
+
+\subsection{Proof of an arbitrary permutation}
+Let $F$ be a finite field, and $f, g$ be two functions on the hypercube $H=\{\pm 1\}^n\subset F^n$ for which we would like to prove that there exists a permutation $\sigma: H\rightarrow H$ such that $f(\sigma(\vec x)) = g(\vec x)$ for all $\vec x\in H$, i.e.
+\[
+\prod_{\vec x \in H} (X + f(\vec x)) = \prod_{\vec x \in H} (X + g(\vec x)). 
+\]
+By Lemma \ref{lem:LogarithmicDerivative}, the product identity is equvialent to proving that
+\begin{equation}
+\label{e:FractionalIdentityPermutation}
+\sum_{\vec x\in H} \frac{1}{X + f(\vec x)} - \frac{1}{X + g(\vec x)} = \sum_{\vec x\in H} \frac{g(\vec x) - f(\vec x)}{(X + f(\vec x))\cdot (X + g(\vec x))} = 0
+\end{equation}
+in the rational function field $F(X)$, if the characteristic of $F$ is larger than $|H|=2^n$.
+The intuition behind the protocol is as follows.
+The fractional identity is reduced to a sumcheck for fractions, 
+\begin{equation*}
+\label{e:sumcheckFractions}
+\sum_{\vec x\in H} \frac{g(\vec x) - f(\vec x)}{(z_1 + f(\vec x))\cdot (z_1 + g(\vec x))} =0,
+\end{equation*}
+where $z_1$ is sampled uniformly at random from $F$. 
+To turn the fractional sumcheck into a sumcheck for polynomials, the prover replaces 
+the fractional function $\frac{g(\vec x) - f(\vec x)}{(z_1 + f(\vec x))\cdot (z_1 + g(\vec x))}$ by its multilinear representation $m(\vec X)$, and additionally proves that this is the right polynomials by showing the inverse relation with $(z_1 + f(\vec x))\cdot (z_2 + f(\vec x))$ on the domain $H$.
+By applying the scalar product with $L_H(\vec X, \vec z_2)$, where $\vec z_2$ is sampled uniformly at random from $F^n$, the domain identity is transformed into a further sumcheck over $H$.
+
+\begin{protocol}[Permutation IOP over $H=\{\pm 1\}^n$]
+\label{prot:pa}
+Assume that $F$ is a finite field with characteristic $p > 2^n$, and let $f,g :H\rightarrow F$ be any pair of functions on the boolean hypercube $H=\{\pm 1\}^n$.
+The tensor IOP for the existance of a permutation $\sigma: H\longrightarrow H$ such that $f(\sigma(\vec x))=g(\vec x)$ for all $\vec x\in H$,
+ is as follows.
+\begin{enumerate} 
+\item
+\label{i:PAstep1}
+Given a random sample $z \sample F$ from the verifier, the prover determines the function $h: H\rightarrow F$ such that for all $\vec x$ in $H$,
+\begin{align} 
+\label{e:pa:m}
+\Big(h(\vec x)\cdot f_z(\vec x)\cdot g_z(\vec x)  + f_z(\vec x) - g_z(\vec x)\Big) \cdot   f_z(\vec x)\cdot g_z(\vec x) &= 0,
+\end{align}
+where $f_z(\vec x) = z + f(\vec x)$, $g_z(\vec x) = z + g(\vec x)$, and so that $\sum_{\vec x\in H} h(\vec x) = 0$.
+It then sends the oracle for $h$ to the verifier.
+
+\item
+\label{i:PAstep2}
+The verifier responds with a random vector $\vec y \sample F^n$ and a batching randomness $\lambda\sample F$.
+Now, both prover and verifier engage in the sumcheck protocol (Protocol \ref{p:Sumcheck}) for 
+\begin{align*} 
+%\label{e:sumcheckm}
+	\sum_{\vec x \in H} Q(L_H(\vec X, \vec y), h(\vec X),  f_z(\vec X),  g_z(\vec X))&= 0,
+\end{align*}
+where 
+\begin{equation}
+\label{e:Qsumcheck}
+Q(L , h, f_z, g_z) =   
+L \cdot  \left(h \cdot f_z \cdot g_z + f_z - g_z\right)\cdot  f_z \cdot g_z +  \lambda \cdot h.
+\end{equation}
+The sumcheck protocol outputs the expected value $v$ for the multivariate polynomial 
+\begin{equation}
+\label{e:QPA}
+\begin{aligned}
+Q(L_H(\vec X, \vec y), m(\vec X), z + f(\vec X),  z + g(\vec X))
+\end{aligned}
+\end{equation}
+at $\vec X=\vec r$ sampled by the verifier in the course of the protocol.
+
+\item
+The verifier queries $[h]$, $[f]$, $[g]$ for the tensor associated with $\vec r$, and uses the answers 
+to check whether \eqref{e:QPA} equals the expected value $v$ at $\vec X = \vec r$. 
+(The value $L_H(\vec r, \vec y)$ is computed by the verifier.)
+\end{enumerate}
+\end{protocol}
+
+
+\begin{rem}
+\label{rem:PAcompleteness}
+The additional product  with $(x - f(\vec x))\cdot(x - g(\vec x))$ in equation \eqref{e:pa:m} is merely needed for completeness.
+They allow to set the values of $m_1$ and $m_2$ at vanishing points of $x - f(\vec x)$ and $x - g(\vec x)$ to some arbitrary value, say $0$, so that still $\sum_{\vec x\in H} m(\vec x) = 0$.
+If one does not aim perfect completeness one can simply omit the product and hence reduce the absolute degree of $Q$ to $d=4$.
+However, it should be noted that such protocol cannot be turned into zero-knowledge, as the verifier always learns that $x$ is not obtained by $f$ and $g$.
+\end{rem}
+
+
+%One can reduce the cost of the sumcheck at the cost of an extra oracle for
+%\[
+%p(\vec x) = (x + f(\vec x))\cdot (x + g(\vec x)),
+%\]
+%and demanding the additional sumcheck proving that $p$ is well-formed, 
+%\[
+%\sum_{\vec x\in H}L(\vec x, \vec y) \cdot \big(p(\vec x) - (x + f(\vec x))\cdot (x + g(\vec x)\big) = 0.
+%\]
+%The verifier instead samples two batching randomnesses $\lambda_1, \lambda_2\sample F$, and the overall sumcheck is done over
+%\begin{equation}
+%\label{e:Qsumcheck2}
+%\tilde Q(L , m, p, f_x, g_x) =   
+%L \cdot  \left(m \cdot p + f_x - g_x\right)\cdot  p +  \lambda_1 \cdot m + \lambda_2\cdot  L\cdot (p - f_x\cdot g_x) .
+%\end{equation}
+%The modified polynomial $\tilde Q$ has now $5$ variables, absolute degree $d=4$, and is linear in all variables except $p$, in which case it is quadratic.
+
+%\begin{rem}
+%Computing  the coefficients of  the multilinear extensions $m_1(\vec X)$ and $m_2(\vec X)$ costs $\bigO{n\cdot 2^n}$ field operations, and the same holds for computing the values of the Lagrange polynomial $L_H(\vec X,z_2)$ over $H$, using the product representation \eqref{e:LagrangeKernel}.
+%However, whenever a linear polynomial commitment scheme is used as replacement of the oracle, then computing the commitments for the multilinear extension can be done in linear time, by precomputing the commitments for the Lagrange basis
+% $\{ L_H(\vec X, \vec x) \,:\, \vec x\in H \}$.
+%If the evaluation proof of that scheme does not need the coefficients, too, then the compiled protocol has a linear time prover. 
+%\end{rem}
+
+
+
+\subsubsection{Soundness}
+\label{s:PASoundness}
+
+The soundness analysis of Protocol \ref{prot:pa}, is a straight-forward application of the Schwartz-Zippel lemma and the tensor-query to point-query correspondence stated by Lemma \ref{lem:Lagrange}.
+We merely sketch it.
+The soundness error of Step \ref{i:PAstep1} is at most 
+\begin{equation*}
+%\label{e:epsilon1}
+\varepsilon_1 \leq 2\cdot\frac{ |H|}{|F|} + \frac{2\cdot |H|}{|F|} = \frac{4\cdot |H|}{|F|}.
+\end{equation*}
+The first term is an upper bound for the probability that one of the polynomials, either
+$p(X)=\prod_{\vec x\in H} (Y + f(\vec x))$ 
+or 
+$q(X)= \prod_{\vec x\in H} (Y + g(\vec x))$ 
+vanishes at $Y=z$, in which case nothing relevant can be deduced from \eqref{e:pa:m} and $\sum_{\vec x\in H} h(\vec x)=0$.
+The second term is the probability that the polynomial identity obtained from \eqref{e:FractionalIdentityPermutation} when multiplying it with $p(Y)\cdot q(Y)$ vanishes at $Y = z$.
+The soundness error due to the reduction of the domain identity  \eqref{e:pa:m}  to the Lagrange kernel based sumcheck is 
+\[
+\varepsilon_2 \leq \frac{1}{|F|},
+\]
+as scalar products with the Lagrange kernel translate to point evaluation of multilinear extensions.
+This yields the following theorem. 
+
+\begin{thm}
+\label{thm:PA:soundness}
+ The interactive oracle proof described Protocol \ref{prot:pa} has soundness error
+$
+\varepsilon \leq \frac{4\cdot |H| + 1}{|F|} + \varepsilon_{sumcheck},
+$
+where $\varepsilon_{sumcheck}$ is the soundness error of the batched sumcheck argument \eqref{e:BatchSumcheckSoundness} over $H=\{\pm 1\}^n$ for two multivariate polynomials of maximum individual degree $d=6$.
+\end{thm}
+
+To decrease the soundness error when dealing with small field sizes $|F|$, one may simply resample $z$ several times, yielding a vector $\vec z = (z_{1}, \ldots, z_N)\in F^N$, compute the corresponding multilinear representations $h_1, \ldots, h_n$,  and run the sumcheck protocol for
+\begin{align} 
+\label{e:sumcheckm}
+	\sum_{\vec x \in H} Q(L_H(\vec X, \vec y), f(\vec X),  g(\vec X), h_1(\vec X),  \ldots,  h_N(\vec X))&= 0,
+\end{align}
+with
+\begin{multline*}
+Q(L , f, g, h_1, \ldots, h_N) 
+\\
+=   
+L \cdot\sum_{i=1}^N \lambda_{i,1}\cdot   \left(h_i\cdot (f + z_i)\cdot (g + z_i) + f - g \right)\cdot  (f + z_i) \cdot (g + z_i) +  \lambda_{i,2} \cdot h_i,
+\end{multline*}
+the $\lambda_{i,1}, \lambda_{i,2}$, $i=1,\ldots, N$, being the batching challenges from the verifier.
+The soundness error is then bounded by 
+\[
+\varepsilon \leq \left(\frac{4\cdot |H| + 1}{|F|}\right)^N + \varepsilon_{sumcheck},
+\]
+at an approximately  $N$-fold cost for the sumcheck:
+The number of variables in $Q$ are  $m= 3 + N$, the absolute remains $d=6$, and the arithmetic complexitie are 
+$|Q_\mathsf M|= 5\cdot N + 1$, $|Q_\mathsf S| = N$,  $|Q_\mathsf A|= 5 \cdot N - 1$.
+
+
+
+
+
+\subsubsection{Computational cost}
+\label{s:PA:cost}
+
+The polynomial $Q$ as defined in \eqref{e:Qsumcheck}  has $\nu = 4$ variables and maximum individual degree $d = 6$. 
+Its arithmetic complexities are $|Q_\mathsf M| = 5$, $|Q_\mathsf S|= 1$, and $|Q|_\mathsf A = 2$.
+This yields the following prover cost:
+Given the values of $f$ and $g$ over $H$, computing the domain evaluation of $m(\vec x) = \frac{g(\vec x) - f(\vec x)}{(x + f(\vec x))\cdot (x + g(\vec x))}$ costs
+\[
+2\cdot |H| \cdot \mathsf A + |H|\cdot \mathsf S + 4\cdot |H|\cdot \mathsf M + 1 \cdot \mathsf I ,
+\]
+using batch inversion for the fractions.
+The domain evaluation for $L_H(\vec X, \vec y)$ is obtained within $|H|\cdot (\mathsf M + \mathsf A)$ operations (see Remark \ref{rem:Lagrange}), and by \eqref{e:SumcheckCostPrecise} the sumcheck costs  
+\begin{equation*}
+|H| \cdot \left(1-\frac{1}{2^{n+1}}\right)\cdot \big(59 \cdot\textsf M +  4\cdot\textsf S + 49 \cdot \textsf A\big).
+\end{equation*}
+Hence the overall cost of the prover is less than
+\begin{equation}
+\label{e:PA:cost}
+|H| \cdot \big(64 \cdot\textsf M +  5\cdot\textsf S + 48 \cdot \textsf A\big),
+\end{equation}
+which are $\bigO{|H|}$ field operations.
+For the incomplete variant of Protocol \ref{prot:pa}, the overall polynomial has absolute degree $d=4$, $|Q_\mathsf M| = 4$, $|Q_\mathsf S|= 1$, and $|Q|_\mathsf A = 2$, and the overall cost of the prover reduces to 
+\begin{equation}
+\label{e:PA:incomplete:cost}
+|H| \cdot \big(41 \cdot\textsf M +  5\cdot\textsf S + 34 \cdot \textsf A\big).
+\end{equation}
+% Univariate PIOP (only M's)
+%     2*|H|*M  for computing quotients over H (batch inversion)
+%     1*|H|*M  for computing Phi over H
+%    |H|*log|H|*M for computing Phi(X)
+%    1*H*M  for comuting Phi(gX)
+%   2*|H|*log|H|*M for computing f(X), g(X)
+% Computing overall poly
+%    3*(1*H + H log H) M for computing Phi, f, g over coset of H (Phi(gX) over coset is for free)
+%    3*2*H* M   for computing the overall poly over domain of size 2*H
+%   2*H *log(2H) = 2*H*(1+log H) *M for computing coeffs of overall poly
+% Computing quotient poly h(X) does not cost any M
+%
+% overall
+%	15*|H| + 8*|H|*log|H| Muls
+Compared to the cost of the univariate permutation PIOP (see Appendix \ref{s:uv:pa}), Protocol \ref{prot:pa} and its incomplete variant have the break-even point at about $\log |H| \approx 5$ and $\log|H| \approx 2$, respectively (without taking 
+into account the computation of the coefficients of the overall quotient polynomial  in the univariate setting).
+
+
+\subsubsection{Comparison with state of the art}
+%There are several permutation arguments over the boolean hypercube, e.g. \cite{TensorR1CS, ?, ?}.
+Let us compare with a multivariate permutation argument based on the grand product argument from Quarks \cite{Quarks}.
+%(To the best of our knowledge this is the most efficient argument.)
+(This is the one used by Hyperplonk \cite{Hyperplonk}.)
+The prover computes the overall product $\prod_{\vec x\in H} \frac{z + f(\vec x)}{z + g(\vec x)} = 1$ recursively in a tree like manner, and records the execution trace by a function 
+\[
+p: \{\pm 1\}\times H\rightarrow F
+\] 
+over the \textit{double-sized} hypercube. 
+(The recursion starts with  $p(1,\vec x) = \frac{z - f(\vec x)}{z - g(\vec x)}$ and ends up with $p(-\vec{1}, 1) = 1$,
+the value $p(-\vec 1)$ is set to zero. 
+See \cite{Quarks} for details.)
+Correctness of $p$ is enforced by the domain identities
+\begin{align}
+\label{e:QuarksPAinit}
+\big( g_z(\vec x) \cdot p(1, \vec x) - f_z(\vec x) \big) \cdot g_z(\vec x) &= 0,
+\\
+p(-1,\vec x) - p(\vec x, 1) \cdot p(\vec x, -1)   &= 0,
+\end{align}
+for all $\vec x$ in $H$, where $f_z(\vec x) = z + f(\vec x)$, $g_z(\vec x) = z+ f(\vec x)$, and the evaluation of $p$ at $\vec p =(-\vec 1,1)$ is translated to the scalar product of $p(-1, \vec x)$ with the Lagrange kernel $L_H(\vec x, \vec p)$,
+\[
+\sum_{\vec x \in H} L_H(\vec x, \vec p)\cdot (p(-1, \vec x) - 1) = 0.
+\]
+As in our protocol, the second factor $(x - g(\vec x))$ in equation \eqref{e:QuarksPAinit} is  for completeness and might be omitted in certain applications.
+The domain identities are reduced to a sumcheck by the Lagrange kernel $L(\:.\:, \vec y)$, $\vec y\sample F^n$, and 
+all three sumchecks are batched together using batching randomnesses $\lambda_1,\lambda_2\sample F$, 
+\[
+\sum_{\vec x\in H} Q\big(L(\vec x,\vec y), L_0(\vec x), p(1, \vec x),p(-1,\vec x), p(\vec x, 1), p(\vec x, -1), f_x(\vec x), g_x(\vec x) \big) = 0,
+\]
+where 
+\begin{multline*}
+Q(L_{\vec y}, L_0, p_{1,*}, p_{-1,*}, p_{*,1}, p_{*,-1}, f_x, g_x) 
+\\=
+L_{\vec y} \cdot \big( g_x\cdot p_{1,*} - f_x \big) \cdot g_x
++ \lambda_1\cdot L_{\vec y}\cdot \big( p_{-1,*} -p_{*,1} \cdot p_{*,-1}\big)
++ \lambda_2\cdot  L_0\cdot (p_{-1,*} - 1).
+\end{multline*}
+The polynomial $Q$ has $\nu = 8$ variables, and absolute degree $d = 4$.
+Its algebraic complexities are $|Q_\mathsf M|= 8$, $|Q_\mathsf S|= 3$, $|Q_\mathsf A|= 2$.
+Computing the quotient function $\frac{x + f(\vec x)}{x+ g(\vec x)}$ costs $3\cdot |H|\cdot\mathsf M + 2\cdot |H|\cdot\mathsf A$ (using batch inversion), and $\nu$ is derived by another $|H|\cdot\mathsf M$.
+The domain evaluations for $L_H(\vec X, \vec y)$ and $L_H(\vec X, \vec p)$ are obtained within $|H|\cdot (\mathsf M + \mathsf A)$ each, and the sumcheck costs 
+\begin{equation*}
+% d_max \cdot |H| \cdot \big((m + |Q|_M)\cdot\textsf M +  (m + |Q|_\textsf S)\cdot\textsf S + (m + |Q|_\textsf A + 1)\cdot \textsf A\big) 
+%\\
+|H| \cdot \big(72 \cdot\textsf M +  24 \cdot\textsf S + 47 \cdot \textsf A\big) 
+\end{equation*}
+Hence the overall cost of the prover is
+\begin{equation}
+|H| \cdot \big(78 \cdot\textsf M +  24\cdot\textsf S +  51 \cdot \textsf A\big),
+\end{equation}
+and its incomplete variant is using
+\begin{equation}
+|H| \cdot \big(58 \cdot\textsf M +  24\cdot\textsf S + 40 \cdot \textsf A\big).
+\end{equation}
+Overall Protocol \ref{prot:pa} and its incomplete variant are more efficient in the number of polynomials (counting $p:\{\pm 1\}\times H\rightarrow F$ as two polynomials over $H$) and the number of field operations.
+
+
+Furthermore, \cite{Hyperplonk} introduce a time shift $T$ on the hypercube $H$ to tackle transitional constraints.
+The time shift is derived from the multiplication by a primitive root in $GF(2^n)$, 
+\[
+T(x_1, \ldots, x_n) = \frac{x_n +1}{2} \cdot (1, x_1,\ldots, x_{n-1}) - \frac{x_n - 1}{2} \cdot (- 1,(-1)^{c_1}\cdot x_1,\ldots, (-1)^{c_n - 1}\cdot x_{n-1}),
+\]  
+where the $c_i$ are the coefficients of a primitive polynomial $1 + \sum_{i=1}^{n-1} c_i\cdot X^i + X^n$ over $GF(2)$.
+It acts transitively on the punctuated hypercube $H' = H\setminus\{\vec 1\}$ (as an automorphism it has $\vec 1$ as a fixed point), and more importantly evaluations of a shifted function $f(T(\vec x))$ can be simulated from two evaluations of $f$.
+%\[
+%f(\sigma(x_1, \ldots, x_n)) = \frac{x_1 +1}{2} \cdot f(x_2,\ldots, x_n, 1) - \frac{x_1 - 1}{2} \cdot f(c_1\cdot x_2,\ldots, c_{n-1}\cdot x_n', c_n)
+%\]  
+Using $T$ allows for the same strategy as in the univariate case. 
+The prover computes the cumulative product function $\phi: H' \longrightarrow F$ by
+\[
+\phi(T^k(-\vec 1)) = \phi(T^{k-1}(-\vec 1)) \cdot \frac{f_z(\vec x)}{g_z(\vec x)},
+\]
+for $k= 1, \ldots, |H'| - 1$, starting with $\phi(-\vec 1) = 1$.
+Correctness of $\phi$ is given by the domain identity 
+\begin{align}
+\label{e:MVCoboundary}
+g_z(\vec x) \cdot \phi(T(\vec x)) - f_z(\vec x) \cdot \phi(\vec x) &= 0,
+\end{align}
+and the initial value $\phi(-\vec 1) = 1$, which is translated to the sumcheck 
+\begin{equation}
+\label{e:CoboundaryInit}
+\sum_{\vec x \in H} L_H(\vec x, -\vec 1)\cdot (\phi(\vec x) - 1) = 0.
+\end{equation}
+The domain identity \eqref{e:MVCoboundary} is reduced to a sumcheck by the Lagrange kernel $L(\:.\:, \vec y)$, $\vec y\sample F^n$, and using a batching randomness $\lambda_1\sample F$ the sumchecks are combined into 
+\[
+\sum_{\vec x\in H}  Q\big(L_H(\vec x,\vec y), L_H(\vec x, -\vec 1), \phi(\vec x), \phi(T(\vec x)), f_z(\vec x), g_z(\vec x) \big) = 0,
+\]
+whereas 
+\begin{equation*}
+Q(L_{\vec y}, L, \phi, \phi_T,  f_z, g_z) =
+L_{\vec y} \cdot \big( g_z \cdot \phi_T - f_z \cdot \phi \big)
++ \lambda_1\cdot  L\cdot (\phi - 1).
+\end{equation*}
+The polynomial $Q$ has $\nu=6$ variables and absolute degree $d = 3$. 
+Its arithmetic complexities are $|Q_\mathsf M| = 5$, $|Q_\mathsf S|= 2$, $|Q_\mathsf A| = 1$.
+The cost for the prover are 
+\[
+2\cdot |H|\cdot \mathsf M + 2\cdot |H|\cdot\mathsf A + 1\cdot \mathsf I
+\] 
+for computing the quotient function over $H$ via batch inversion, and the domain evaluations for $L_H(\vec X, \vec y)$ and $L_H(\vec X, -\vec 1)$ are each obtained within $|H|\cdot (\mathsf M + \mathsf A)$ operations. 
+The sumcheck consumes about the half as in our protocol,
+\begin{equation*}
+% d_max \cdot |H| \cdot \big((m + |Q|_M)\cdot\textsf M +  (m + |Q|_\textsf S)\cdot\textsf S + (m + |Q|_\textsf A + 1)\cdot \textsf A\big) 
+%\\
+|H| \cdot \big(38 \cdot\textsf M +  12 \cdot\textsf S + 26  \cdot \textsf A\big) 
+\end{equation*}
+yielding overall 
+\begin{equation}
+|H| \cdot \big(42 \cdot\textsf M +  12\cdot\textsf S + 30 \cdot \textsf A\big).
+\end{equation}
+which outperforms the other complete IOPs, at the cost of restricting to the punctuated hypercube.
+(However, the incomplete variant of Protocol \ref{prot:pa} is slightly more efficient.)
+
+
+\subsubsection{Generalizations}
+\label{s:pa:Generalizations}
+
+Protocol \ref{prot:pa} can be easily generalized to functions $f,g: H\longrightarrow F[Z_1,\ldots,Z_k]$ with multilinear values, 
+\begin{align*}
+f(\vec x) &= \sum_{(i_1,\ldots, i_k)\in\{0,1\}^k} f_{i_1,\ldots, i_k}(\vec x)\cdot Z_1^{i_1}\cdots Z_k^{i_k},
+\\
+g(\vec x) &= \sum_{(i_1,\ldots, i_k)\in\{0,1\}^k} g_{i_1,\ldots, i_k}(\vec x)\cdot Z_1^{i_1}\cdots Z_k^{i_k},
+\end{align*}
+without changing the soundness error bound in Theorem \ref{thm:PA:soundness}.
+As $F[X,Z_1,\ldots, Z_k]$ is a unique factorization domain, and polynomials of the form $X -  \sum_{(i_1,\ldots, i_k)\in\{0,1\}^k} c_{i_1,\ldots, i_k}\cdot Z_1^{i_1}\cdots Z_k^{i_k}$ are irreducible,
+\begin{equation}
+\label{e:prodExt}
+\prod_{\vec x\in H} \Big(X -  f(\vec x)(\vec Z)\big) = \prod_{\vec x\in H} \big(X - g(\vec x)(\vec Z)\big)
+\end{equation}
+if and only if there exists a permutation $\sigma:H\rightarrow H$ such that $f(\sigma(\vec x)) = g(\vec x)$ for every $\vec x\in H$.
+Again, by Lemma \ref{lem:LogarithmicDerivative} the product identity \eqref{e:prodExt} holds if and only if 
+\begin{equation}
+\label{e:sumExt}
+\sum_{\vec x\in H} \frac{1}{X -  f(\vec x)(\vec Z)} = \prod_{\vec x\in H} \frac{1}{X - g(\vec x)(\vec Z)}
+\end{equation}
+in the function field $F(Z_1,\ldots, Z_k)(X) = F(X,Z_1,\ldots, Z_k)$.
+The only change to Protocol \ref{prot:pa} is that the verifier now samples $z$ from $F$ and $\vec z = (z_1,\ldots, z_k)$ from $F^k$, and continues with $z - f(\vec x)$ and $z - g(\vec z)$ replaced by $z - f(\vec x)(\vec z)$ and $z - g(\vec x)(\vec z)$.
+As the individual degrees with respect to $Z_1$, \ldots, $Z_k$ are again bounded by $|H|$, the soundness error does not change.
+
+Alternatively, at the cost of a slight increase of the soundness error one can choose $f, g: H\longrightarrow F[X]$ with values being polynomials of degree at most $k-1$ . 
+
+
+\subsection{Proof of a specific permutation}
+
+Suppose that we have given a bijective mapping $\sigma: H\rightarrow H$. 
+The naive approach to prove two functions $f,g: H\longrightarrow F$ to be such that 
+\[
+g(\sigma(\vec x)) = f(\vec x) \quad\text{for all $\vec x\in H$},
+\]
+is by applying the generalized permutation argument from Section \ref{s:pa:Generalizations} to the extended $(F^n\times F)$-valued functions
+\begin{align*}
+\bar g(\vec x) = (\vec x, g(\vec x))
+\\
+\bar f(\vec x) = (\sigma(\vec x), f(\vec x)).
+\end{align*}
+This corresponds to proving the identity
+\begin{equation}
+\prod_{\vec x\in H} \Big(X + f(\vec x) + \sum_{j=1}^n \sigma_{j}(\vec x)\cdot Y_j\Big) = \prod_{\vec x\in H}  \Big(X + g(\vec x) +  \sum_{j=1}^n x_j \cdot Y_j\Big),
+\end{equation}
+in the course of which the verifier provides random $x\sample F$ for $X$ and $\vec y\sample Y^n$ for $(Y_1,\ldots, Y_n)$.
+However, this results in a superlinear prover, as the prover needs to compute the values of
+\[
+x + f(\vec x) +  \sum_{j=1}^n \sigma_{j}(\vec x)\cdot y_j
+\]
+from the given domain evaluations of $\sigma_j$ over $H$.
+(However, the computation of $x + f(\vec x) +  \sum_{j=1}^n x_j \cdot y_j$ can be done in linear time.)
+To overcome this problem, we introduce a univariate index for the domain $H=\{\pm 1\}^n$. 
+(This is also done in the permutation argument of Hyperplonk \cite{Hyperplonk}.)
+Each $(x_1,\ldots, x_n)\in H $ defines an integer from the interval $\{0,1, \ldots, 2^n -1\}$ via the linear polynomial
+\begin{equation*}
+%\label{e:iota}
+\iota(\vec x) := \sum_{j=1}^n \frac{x_i + 1}{2} \cdot 2^{j-1},
+\end{equation*}
+which is a one-to-one mapping from $H$ into $F$ whenever its characteristic $p > |H|$.
+The targeted claim is now translated into a permutation argument for the $(F\times F)$-valued functions
+\begin{align*}
+\bar g(\vec x) = (\iota(\vec x), g(\vec x))
+\\
+\bar f(\vec x) = (\iota(\sigma(\vec x)), f(\vec x)),
+\end{align*}
+which corresponds to the polynomial identity
+\begin{equation*}
+%\label{e:PermutationIdentity2}
+\prod_{\vec x\in H} \Big(X + g(\vec x) +\iota(\sigma(\vec x))\cdot Y\Big) = \prod_{\vec x\in H}  \Big(X + f(\vec x) + \iota(\vec x) \cdot Y \Big).
+\end{equation*}
+Now, given the values of $\iota(\sigma(\vec x))$, $\iota(\vec x)$ over $H$,  and random $x, y\sample F$, both functions 
+\begin{align}
+\label{e:fxy}
+f_{x,y}(\vec x) &= y + f(\vec x) + \iota(\vec x) \cdot y,
+\\
+\label{e:gxy}
+g_{x,y}(\vec x) &= x + g(\vec x) +\iota(\sigma(\vec x))\cdot y,
+\end{align}
+can be computed over $H$ at the cost of only $O(|H|)$ field operations.
+For the sake of completeness we give a detailed description of the full protocol.
+
+\begin{protocol}[Permutation IOP for functions over $H=\{\pm 1\}^n$]
+\label{prot:pa2}
+Assume that $F$ is a finite field with characteristic $p > 2^n$, and let $\sigma: H\rightarrow H$ a bijective mapping.
+Given $f,g :H\rightarrow F$ and $\iota, \iota\circ\sigma: H\rightarrow F$ as defined above, the tensor IOP for that  $f(\sigma(\vec x))=g(\vec x)$ for all $\vec x\in H$,
+ is as follows.
+\begin{enumerate} 
+\item
+\label{i:pa2:step1}
+Given random samples $x, y\sample F$ from the verifier, the prover computes the values of
+determines the function $h:H\rightarrow F$ such that for all $\vec x$ in $H$, 
+\begin{align*} 
+%\label{e:PA2:m}
+	\Big(h(\vec x)\cdot \left( f_{x,y}(\vec x))\cdot g_{x,y}(\vec x) \right) + f_{x,y}(\vec x) - g_{x,y}(\vec x)\Big)\cdot  f_{x,y}(\vec x)\cdot g_{x,y}(\vec x) &= 0,
+\end{align*}
+where $f_{x,y}$ and $g_{x,y}$ are as in \eqref{e:fxy} and \eqref{e:gxy}, and such that $\sum_{\vec x\in H} m(\vec x) = 0$.
+It then sends the oracle for $h$ to the verifier.
+
+\item
+\label{i:pa2:step2}
+The verifier responds with a random vector $\vec z \sample F^n$ and a batching randomness $\lambda\sample F$.
+Now, both prover and verifier engage in the sumcheck protocol (Protocol \ref{p:Sumcheck}) for 
+\begin{align*} 
+%\label{e:PA2:sumcheckm}
+	\sum_{\vec x \in H} Q(L_H(\vec X, \vec z), h(\vec X),  f_{x,y}(\vec X),  g_{x,y}(\vec X))&= 0,
+\end{align*}
+where 
+\begin{equation*}
+Q(L, h, f, g) =   
+L \cdot  \left(h\cdot f\cdot g + f - g\right)\cdot  f \cdot g +  \lambda \cdot h.
+\end{equation*}
+The sumcheck protocol outputs the expected value $v$ for the multivariate polynomial 
+\begin{equation}
+\label{e:PA2:Q}
+\begin{aligned}
+Q(L_H(\vec X, \vec z), h(\vec X), f_{x,y}(\vec X),  g_{x,y}(\vec X))
+\end{aligned}
+\end{equation}
+at $\vec X=\vec r$ sampled by the verifier in the course of the protocol.
+
+\item
+The verifier queries for  $[m]$, $[f]$, $[g]$, $[\iota\circ\sigma]$ for the tensor associated with $\vec r$, and uses the answers 
+to check whether \eqref{e:PA2:Q} equals the expected value $v$ at $\vec X = \vec r$. 
+(The values of $\iota(\vec r)$ and $L_H(\vec r, \vec z)$ are computed by the verifier.)
+\end{enumerate}
+\end{protocol}
+
+The soundness error of Protocol \ref{prot:pa2} is the same as in Theorem \ref{thm:PA:soundness}, and the overall cost of the prover \eqref{e:PA:cost} is increased by $2\cdot |H|\cdot\mathsf M + |H|\cdot\mathsf A$.
+As this increase affect all the other protocols we compared with in Section \ref{s:PA:cost}, the comparison therein is carried over in a straight-forward manner to the current setting.
+
+\section{Lookups over the boolean hypercube}
+
+%\[
+%\sum_{\vec x\in H} \frac{1}{X + f(\vec x)} = \sum_{\vec x\in H} \frac{m(\vec x)}{X + g(\vec x)}  
+%\]
+%
+%
+%\[
+%\sum_{\vec x\in H} \frac{1}{x + f(\vec x)} - \frac{m(\vec x)}{x + g(\vec x)} = 0  
+%\]
+Our lookup IOP is based on Lemma \ref{lem:batchsetmembership}, which states that for a field $F$ of characteristic larger than $H$ and functions $f, g: H\rightarrow F$, it holds that $\{f(\vec x)\}_{\vec x\in H}\subseteq \{g(\vec x)\}_{\vec x\in H}$ as sets (with multiple occurences removed), if and only if there exists a function $m: H\rightarrow F$ such that
+\[
+\sum_{\vec x\in H} \frac{1}{X + f(\vec x)} = \sum_{\vec x\in H} \frac{m(\vec x)}{X + g(\vec x)}.
+\]
+If $g$ is injective (which is typically the case for lookup tables) then $m$ is the multiplicity function, counting the occurences of each $g(\vec x)$ under $f$, i.e.
+$m(\vec x) = m_f(g(\vec x)) = |\{\vec y \in H: f(\vec y) = g(\vec x))|$.
+If $g$ is not one-to-one, it may be set as the \textit{normalized} multiplicity function 
+\begin{equation}
+\label{e:lookup:m}
+m(\vec x) = 
+\frac{m_f(g(\vec x))}{m_g(g(\vec x))} %= \frac{ |\{\vec y \in H: f(\vec y) = g(\vec x))|}{ |\{\vec y \in H: g(\vec y) = g(\vec x))|},
+\end{equation}
+where $m_g(a)$ and $m_{f}(a)$ denotes the number of occurences of a field element $a$ in $f$ and  $g$, respectively.
+The protocol is essentially as Protocol \ref{prot:pa}.
+Given a random challenge $x\sample F$, the prover shows that
+\[
+\sum_{\vec x\in H} \frac{m(\vec x)}{x + g(\vec x)} - \frac{1}{x + f(\vec x)} 
+= \sum_{\vec x\in H} \frac{ m(\vec x)\cdot (x + f(\vec x)) - (x + g(\vec x))}{(x + f(\vec x))\cdot (x + g(\vec x))} 
+= 0,
+\]
+for which it provides a supplementary oracle $h: H\rightarrow F$ subject to $\sum_{\vec x\in H} h(\vec x) = 0$.
+The oracle is proven correct by enforcing the proper identity over $H$, and the Lagrange kernel $L_H(\:.\:, \vec z)$ at a randomly chosen $\vec z\sample F^n$ is taken to reduce the domain identity to a sumcheck. 
+Both sumchecks, the one for $h$ and the one for the domain identity, are then combined into a single one.
+
+\begin{protocol}[Lookup IOP over $H=\{\pm 1\}^n$]
+\label{prot:lookup}
+Assume that $F$ is a finite field with characteristic $p > 2^n$, and let $f,g :H\rightarrow F$ be any pair of functions on the boolean hypercube $H=\{\pm 1\}^n$.
+The tensor IOP for that $f = \{f(\vec x) : \vec x\in H\}\subseteq \{g(\vec x) : \vec x\in H\}$ as sets (having multiple occurences removed) is as follows.
+\begin{enumerate} 
+\item
+The prover determines the (normalized) multiplicity function $m:H\rightarrow F$ as defined in \eqref{e:lookup:m},
+and sends the oracle for $m$ to the verifier, which returns a random sample $x\sample F$.
+
+\item
+\label{i:lookup:step1}
+The prover determines the logarithmic derivative function $h: H\longrightarrow F$ such that for all $\vec x$ in $H$,
+\begin{align*} 
+%\label{e:m}
+	\Big(h(\vec x)\cdot \left(x + f(\vec x))\cdot (x + g(\vec x)) \right) +  m(\vec x) \cdot (x + f(\vec x)) - (x + g(\vec x)) \Big)\cdot  (x + f(\vec x))\cdot (x + g(\vec x)) &= 0
+\end{align*}
+and that $\sum_{\vec x\in H} h(\vec x) = 0$.
+It then sends the oracle for $h$ to the verifier.
+
+\item
+\label{i:lookup:step2}
+The verifier responds with a random vector $\vec y \sample F^n$ and a batching randomness $\lambda\sample F$.
+Now, both prover and verifier engage in the sumcheck protocol (Protocol \ref{p:Sumcheck}) for 
+\begin{align*} 
+%\label{e:sumcheckh}
+\sum_{\vec x \in H} Q(L_H(\vec x, \vec y),  h(\vec x), m(\vec x),  x + f(\vec x),  x + g(\vec x))&= 0,
+\end{align*}
+where 
+\begin{equation}
+\label{e:lookup:Q}
+Q(L,h,m, f_x, g_x) =   
+L\cdot  \left(h \cdot f_x \cdot g_x + m\cdot f_x-  g_x\right)\cdot  f_x \cdot g_x +  \lambda \cdot h.
+\end{equation}
+The sumcheck protocol outputs the expected value $v$ for the multivariate polynomial 
+\begin{equation}
+\label{e:lookup:QinX}
+\begin{aligned}
+Q(L_H(\vec X, \vec y), h(\vec X), m(\vec X), x + f(\vec X),  x + g(\vec X))
+\end{aligned}
+\end{equation}
+at $\vec X=\vec r$ sampled by the verifier in the course of the protocol.
+
+\item
+The verifier queries for  $[f]$, $[g]$, $[m]$, and $[h]$ for the tensor associated with $\vec r$, and uses the answers 
+to check whether \eqref{e:lookup:QinX} equals the expected value $v$ at $\vec X = \vec r$. 
+(The value $L_H(\vec r, \vec y)$ is computed by the verifier.)
+\end{enumerate}
+\end{protocol}
+
+\begin{rem}
+The lookup protocol is easily extended to a proof of range equality, i.e. $\{f(\vec x)\}_{\vec x\in H} = \{g(\vec x)\}_{\vec x\in H}$ as sets.
+For that the prover needs to show that $m(\vec x)\neq 0$ on $H$ by providing another auxiliary function $h_2: H\rightarrow F$ subject to $h_2(\vec x)\cdot m(\vec x) = 1$.
+However, we are not aware of any application of this fact.
+\end{rem}
+
+\subsection{Soundness}
+The soundness analysis of Protocol \ref{prot:lookup} is as for the permutation argument, with no change in the soundness error. 
+We simply state the following theorem.
+\begin{thm}
+\label{thm:lookup:soundness}
+ The interactive oracle proof described Protocol \ref{prot:lookup} has soundness error
+$
+\varepsilon \leq \frac{4\cdot |H| + 1}{|F|} + \varepsilon_{sumcheck},
+$
+where $\varepsilon_{sumcheck}$ is the soundness error of the batched sumcheck argument \eqref{e:BatchSumcheckSoundness} over $H=\{\pm 1\}^n$ for two multivariate polynomials of maximum individual degree $d = 6$.
+\end{thm}
+
+\subsection{Computational cost}
+
+The polynomial $Q$ from \eqref{e:lookup:Q} has $\nu=5$ variables, and absolute degree $d=6$. 
+Its arithmetic complexities are $|Q_\mathsf M| = 6$, $|Q_\mathsf S| = 1$, $|Q_\mathsf A| = 2$.
+The prover cost of Protocol \ref{prot:lookup} is as follows:
+Given the values of $f$ and $g$ over $H$, computing the domain evaluation of $h(\vec x) = \frac{m(\vec x)\cdot (x + f(\vec x)) - (x + g(\vec x))}{(x + f(\vec x))\cdot (x + g(\vec x))}$ costs
+\[
+4\cdot |H| \cdot \mathsf A + |H|\cdot \mathsf S + 5\cdot |H|\cdot \mathsf M + 1 \cdot \mathsf I ,
+\]
+using batch inversion for the fractions.
+The values for $L_H(\vec X, \vec y)$ over $H$ are obtained within $|H|\cdot (\mathsf M + \mathsf A)$ operations, and by \eqref{e:SumcheckCostPrecise} the sumcheck costs  
+\begin{equation*}
+|H| \cdot \left(1-\frac{1}{2^{n+1}}\right)\cdot \big(72 \cdot\textsf M +  5\cdot\textsf S + 51 \cdot \textsf A\big).
+\end{equation*}
+Neglecting the $\nicefrac{1}{2^{n+1}}$-term, the overall cost of the prover is 
+\begin{equation}
+\label{e:lookup:cost}
+|H| \cdot \big(78\cdot\textsf M +  6\cdot\textsf S + 54 \cdot \textsf A\big),
+\end{equation}
+which are $\bigO{|H|}$ field operations.
+For an incomplete variant of Protocol \ref{prot:lookup} in which the second occurence of $f_x\cdot g_x$ is removed,
+the overall polynomial has absolute degree $d=4$, $|Q_\mathsf M| = 5$, $|Q_\mathsf S|= 1$, and $|Q|_\mathsf A = 2$.
+The total prover cost reduces to 
+\begin{equation}
+\label{e:lookup:incomplete:cost}
+|H| \cdot \big(51 \cdot\textsf M +  6\cdot\textsf S + 38 \cdot \textsf A\big).
+\end{equation}
+Compared to the cost of the univariate lookup PIOP (see Appendix \ref{s:uv:lookup}), the multivariate lookup has its break-even point at about $\log |H| \approx 2.3$.
+However, this is without taking into account that in the univariate case a total of $3$ polynomials of size $|H|$ need to be provided, which is one more than in our protocol (neglecting the overall quotient polynomial). 
+Thus it is safe to assume that Protocol \ref{prot:pa} is throughout faster than the univariate case, and we expected it to be more than three times as performant at $\log|H| \approx 12$.
+
+\subsection{Comparison with state of the art}
+
+Protocol \ref{prot:lookup} outperforms every lookup over the entire hypercube $H$, which are based on the proof of shift from \cite{TensorR1CS}. 
+This is due to mere fact that the proof of shift demands additional oracles for the shifts, and ending up at least with the double number of oracles (independent how the grand products are proven).   
+
+Hyperplonk \cite{Hyperplonk} uses the afore mentioned shift $\sigma: H\rightarrow H$ to construct lookups over the punctuated hypercube $H' = H\setminus\{\vec 1\}$. 
+Let $t: H\rightarrow F$ be the lookup table, and $f: H\rightarrow F$ any function.
+As in the univariate case (see Appendix \ref{s:uv:lookup}), the prover provides the ordered merge of $f$ and $t$ via two functions $s_0, s_1: H\rightarrow F$ subject to the Gabizon identity
+\[
+\prod_{\vec x\in H} (X + s_0(\vec x) + s_1(\vec x)\cdot Y)\cdot (X + s_1(\vec x) + s_0(g\cdot \vec x)\cdot Y) = \prod_{\vec x\in H} (X + f(\vec x) + f(\vec x)\cdot Y)\cdot (X + t(\vec x) + t(g\cdot \vec x)\cdot Y),
+\]
+which is reduced to 
+\[
+\prod_{\vec x\in H} \frac{(\alpha + s_0(\vec x) + s_1(\vec x)\cdot \beta)\cdot (\alpha + s_1(\vec x) + s_0(\sigma(\vec x))\cdot \beta)}{
+(\alpha + f(\vec x) + f(\vec x)\cdot \beta)\cdot (\alpha + g(\vec x) + g(\sigma(\vec x))\cdot \beta)} = 1,
+\]
+by random $\alpha, \beta\sample F$.
+The IOP in \cite{Hyperplonk} uses the grand product argument from \cite{Quarks}, but the protocol is easily improved by taking over the univariate strategy:
+The prover computes $\phi$ recursively along the orbit of $\sigma$, starting with $\phi(-\vec 1) = 1$, and setting
+\[
+\phi\big(\sigma^{k}(-\vec 1)\big) = \phi\big(\sigma^{k-1}(-\vec 1)\big) \cdot h\big(\sigma^{k-1}(-\vec 1)\big).
+\]
+At the remaining point $\vec x = \vec 1$ outside $H'$, we set $\phi(\vec x)$ to zero.
+Correctness of $\phi$ is given by 
+\begin{equation*}
+\phi(\sigma( \vec x)) \cdot f_{\alpha,\beta}(\vec x)\cdot t_{\alpha,\beta}(\vec x) 
+- \phi(\vec x)\cdot s_{0,\alpha,\beta}(\vec x)\cdot s_{1,\alpha,\beta}(\vec x)
+= 0 
+\end{equation*}
+for all $\vec x \in H$, where 
+\begin{align*}
+f_{\alpha,\beta} (\vec x) &=\alpha +  (1+\beta)\cdot f(\vec x),
+\\
+t_{\alpha, \beta}(\vec x) &= \alpha + t(\vec x) + \beta\cdot t(\sigma( \vec x)),
+\\
+s_{0,\alpha,\beta}(\vec x) &= \alpha + s_0(\vec x) + \beta\cdot s_1(\vec x),
+\\
+s_{1,\alpha,\beta}(\vec x) &=  \alpha + s_1(\vec x) + \beta\cdot s_0(\sigma( \vec x)),
+\end{align*}
+and the constraint on its initial value $\phi(-\vec 1) = 1$.
+As before, both constraints are transformed into sumchecks over $H$ by help of the Lagrange kernels $L_H(\:.\:, \vec y)$, $\vec y\in F^n$ and $L_H(\:.\:, -\vec 1)$, and combined into a single one by a batching randomness $\lambda\sample F$,
+\[
+\sum_{\vec x\in H} Q(L_H(\vec x, \vec y), L(\vec x, -\vec 1), f_{\alpha,\beta}(\vec x) , t_{\alpha,\beta}(\vec x), s_{0,\alpha,\beta}(\vec x),s_{1,\alpha,\beta}(\vec x), \phi(\vec x), \phi(\sigma(\vec x))) = 0,
+\]
+where
+\begin{equation*}
+Q(L_H, L,   f_{\alpha,\beta} , t_{\alpha,\beta}, s_{0,\alpha,\beta}, s_{1,\alpha,\beta}, \phi, \phi_\sigma) 
+= L_H \cdot \Big(\phi_\sigma \cdot f_{\alpha,\beta}\cdot t_{\alpha,\beta} 
+- \phi \cdot s_{0,\alpha,\beta} \cdot s_{1,\alpha,\beta}\Big)
++ \lambda\cdot L \cdot (\phi - 1). 
+\end{equation*}
+The polynomial $Q$ has $\nu= 8$ variables, absolute degree $d=4$, and arithmetic complexities $|Q_\mathsf M|= 7$, $|Q_\mathsf S|= 2$, $|Q_\mathsf A|= 1$. 
+Computing $f_{\alpha,\beta}, t_{\alpha,\beta}, s_{0,\alpha,\beta}, s_{1,\alpha,\beta}$ over $H$ consumes 
+\[
+|H|\cdot (4\cdot \mathsf M + 7 \mathsf A),
+\]
+and $\phi(x)$ over $H$ is derived by another $6\cdot |H|\cdot \mathsf M$ (again, using batch inversion). 
+The domain evaluation for $L_H(\vec X, \vec y)$ is obtained within $|H|\cdot (\mathsf M + \mathsf A)$ operations, and the sumcheck costs
+\begin{equation*}
+|H| \cdot \left(1-\frac{1}{2^{n+1}}\right)\cdot \big(67 \cdot\textsf M +  16\cdot\textsf S + 42 \cdot \textsf A\big).
+\end{equation*}
+Neglecting the $\nicefrac{1}{2^{n+1}}$-term, the overall cost of the prover is 
+\begin{equation}
+\label{e:lookup:hyperplonk:cost}
+|H| \cdot \big(78\cdot\textsf M +  16\cdot\textsf S + 49 \cdot \textsf A\big),
+\end{equation}
+This is comparable with \eqref{e:lookup:cost}, not taking into account that the prover needs to supply a total of $3$ functions over $H$ instead of $2$. 
+(The IOP of the incomplete variant of Protocol \ref{prot:lookup} instead is about $1.5$ times faster.)
+
+For a better comparison, let us consider a linearized variant of $Q$ in Protocol \ref{prot:lookup}.
+The prover provides an extra oracle $p$ for the product of $f_x(\vec x) = x + f(\vec x)$ and $g_x(\vec x) = x + g(\vec x)$, subject to the domain identity
+\[
+p(\vec x) - f_x(\vec x)\cdot g_x(\vec x) = 0
+\]
+over $H$.
+Then the overall polynomial for the sumcheck is 
+\begin{equation*}
+%\label{e:lookup:Q:linearized}
+Q(L,h,m, f_x, g_x, p) =   
+L\cdot  \left(h \cdot p + m\cdot f_x-  g_x\right)\cdot  p +  \lambda_1 \cdot h + \lambda_2\cdot L \cdot (p(\vec x) - f_x(\vec x)\cdot g_x(\vec x)),
+\end{equation*}
+which has $\nu=6$ variables,  absolute degree $d=4$, and arithmetic complexities $|Q_\mathsf M| = 7$, $|Q_\mathsf S| = 1$, $|Q_\mathsf A| = 3$.
+The sumcheck now consumes
+\begin{equation*}
+|H| \cdot \left(1-\frac{1}{2^{n+1}}\right)\cdot \big(63 \cdot\textsf M +  7\cdot\textsf S + 48 \cdot \textsf A\big),
+\end{equation*}
+and the total prover cost is
+\begin{equation*}
+|H| \cdot \big(69 \cdot\textsf M +  8\cdot\textsf S + 15 \cdot \textsf A\big),
+\end{equation*}
+which is a $13\%$ improvement over \eqref{e:lookup:hyperplonk:cost}, at the same number of oracles.
+%The Setty grand product variant
+%\begin{align*}
+%f_{\alpha,\beta} (\vec x) &=\alpha + f(\vec x)\cdot (1+\beta)
+%\\
+%t_{\alpha, \beta}(\vec x) &= \alpha + t(\vec x) + t(\sigma( \vec x))\cdot \beta
+%\\
+%s_{1,\alpha,\beta}(\vec x) &= \alpha + s_0(\vec x) + s_1(\vec x)\cdot \beta
+%\\
+%s_{1,\alpha,\beta}(\vec x) &=  \alpha + s_1(\vec x) + s_0(\sigma( \vec x))\cdot \beta.
+%\end{align*}
+%Correctness of $\nu$ is enforced by the domain identities
+%\begin{align}
+%\label{e:QuarksPAinit}
+%\big( f_{\alpha,\beta}(\vec x)\cdot t_{\alpha,\beta}(\vec x)\cdot \nu(1, \vec x) - s_{0,\alpha,\beta}(\vec x)\cdot s_{1,\alpha,\beta}(\vec x) \big) \cdot f_{\alpha,\beta}(\vec x)\cdot t_{\alpha,\beta}(\vec x) &= 0,
+%\\
+%\nu(-1,\vec x) - \nu(\vec x, 1) \cdot \nu(\vec x, -1)   &= 0,
+%\end{align}
+%for all $\vec x$ in $H$, and evaluation at $\vec p =(-\vec 1,1)$ is translated to the scalar product of $\nu(-1, \vec x)$ with the Lagrange kernel $L(\vec x, \vec p)$,
+%\[
+%\sum_{\vec x \in H} L(\vec x, \vec p)\cdot (\nu(-1, \vec x) - 1) = 0.
+%\]
+%As in our protocol, the second factor $f_{\alpha,\beta}(\vec x)\cdot t_{\alpha,\beta}(\vec x)$ in equation \eqref{e:QuarksPAinit} is  for completeness and might be omitted in certain applications.
+%The domain identities are reduced to a sumcheck by the Lagrange kernel $L(\:.\:, \vec z)$, $\vec z\sample F^n$, and 
+%all three sumchecks are batched together using batching randomnesses $\lambda_1,\lambda_2\sample F$, 
+%\[
+%\sum_{\vec x\in H} Q\big(L_H(\vec x,\vec y), L_0(\vec x), \nu(1, \vec x),\nu(-1,\vec x), \nu(\vec x, 1), \nu(\vec x, -1), f_{\alpha,\beta}(\vec x), t_{\alpha,\beta}(\vec x), s_{0,\alpha,\beta}(\vec x), s_{1,\alpha,\beta}(\vec x) \big) = 0,
+%\]
+%where 
+%\begin{multline*}
+%Q(L_H, L, \nu_{1,*}, \nu_{-1,*}, \nu_{*,1}, \nu_{*,-1}, f_{\alpha, \beta}, t_{\alpha,\beta}, s_{0,\alpha,\beta}, s_{1,\alpha,\beta}) 
+%\\=
+%L_H \cdot \big(  f_{\alpha,\beta}\cdot t_{\alpha,\beta} \cdot \nu_{1,*} - s_{0,\alpha,\beta}\cdot s_{1,\alpha,\beta} \big) \cdot f_{\alpha,\beta}\cdot t_{\alpha,\beta} 
+%\\
+%+ \lambda_1\cdot L_{H}\cdot \big( \nu_{-1,*} -\nu_{*,1} \cdot \nu_{*,-1}\big)
+%+ \lambda_2\cdot  L_0\cdot (\nu_{-1,*} - 1).
+%\end{multline*}
+%The polynomial $Q$ has $\nu = 10$ variables, and absolute degree $d = 6$.
+%Its algebraic complexities are $|Q_\mathsf M|= 9$, $|Q_\mathsf S|= 3$, $|Q_\mathsf A|= 2$.
+%The overall cost of the IOP is
+%\begin{equation*}
+%134\cdot\mathsf M + 30\cdot\mathsf S + 89\cdot\mathsf A.
+%\end{equation*}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\bibliographystyle{alpha}
+\bibliography{bibfileSNARKs}
+
+\appendix
+%\newpage
+\section{Appendix}
+\label{s:Appendix}
+
+\subsection{Univariate permutation argument}
+\label{s:uv:pa}
+
+We assume that $F$ is a finite field, and $H$ is a cyclic multiplicative subgroup of order $|H|=2^n$ having generator $g$.
+We shall denote by $v_H(X) = X^n - 1$ the vanishing polynomial of $H$.
+Given two functions $f, g: H\rightarrow F$, the permutation argument is based on the formal identity 
+\[
+\prod_{x\in H} (X - f(x)) = \prod_{x\in H} (X - g(x)),
+\]
+which is reduced by random a random sample $\alpha\sample F$ for $X$ to the grand product
+\[
+\prod_{x\in H} \frac{\alpha - f(x)}{\alpha - g(x)} = 1.
+\]
+The strategy to prove the grand product is as follows. 
+(To the best of our knowledge, this strategy dates back to \cite{tinyRAM} but has been rediscovered independently in \cite{Plonk}.)
+The prover computes the cumulative products $\phi: H\rightarrow F$ recursively  by setting $\phi(1)= 1$, and $\phi(g^i )= \phi(g^{i-1})\cdot q(g^{i-1})$, for $i=1,\ldots, n-1$.
+Note that the grand product is equal to $1$ if and only if $\phi(g^n) = \phi(1) = 1$.
+This leads to the following identities over $H$,
+\begin{equation}
+\phi(g\cdot x) \cdot (\alpha + g(x)) - \phi(x)\cdot (\alpha + f(x))
+= 0,
+\end{equation}
+and
+\begin{equation}
+L_H(x, 1)\cdot (\phi(x) - 1) = 0,
+\end{equation}
+where 
+\begin{equation}
+\label{e:uv:lagrange}
+L_H(X, Y) = \frac{1}{n}\cdot \frac{Y\cdot v_H(X) - X\cdot v_H(Y)}{X - Y}
+\end{equation}
+is the Lagrange kernel for the univariate domain $H$.
+(See \cite{Darlin} for details on this representation of the Lagrange kernel.)
+Using a random $\lambda\sample F$, the two domain identities are combined into a single one, yielding the overall identity
+\begin{equation}
+\label{e:uv:pa:overall:identity}
+\phi(g\cdot X) \cdot (\alpha + g(X)) - \phi(X)\cdot (\alpha + f(X)) + \lambda\cdot L_H(X, 1)\cdot (\phi(X) - 1) = h(X)\cdot v_H(X),
+\end{equation}
+which is proven by checking it at a random point $x\sample F$. 
+
+The prover cost of this polynomial IOP is as follows.
+Computing $f_\alpha(x) = \alpha + f(x)$ and $g_\alpha(x) = \alpha + g(x)$ over $H$ consumes 
+\[
+2\cdot |H|\cdot \mathsf A,
+\]
+and $\phi(x)$ over $H$ is derived by  
+\[
+3\cdot |H|\cdot \mathsf M,
+\] 
+using batch inversion. 
+The domain evaluation for $L_H(x, y) = \frac{1}{n}\cdot \frac{- x \cdot v_H(y)}{x- y}$ is obtained within $3\cdot |H|\cdot (3\cdot \mathsf M + \mathsf S)$ operations (again, using batch inversion).
+The coefficients of $f(X)$, $g(X)$, $\phi(X)$ are obtained in overall  
+\[
+3\cdot |H|\cdot \log|H|\cdot (\mathsf M + \mathsf A).
+\] 
+The largest part of the prover costs is the computation of the overall quotient $h(X)$.
+Its values are computed over a suitably sized multiplication domain of size $2\cdot |H|$.
+The steps for computing the values of $h$ are as follows.
+% Univariate PIOP (only M's)
+%     2*|H|*M  for computing quotients over H (batch inversion)
+%     1*|H|*M  for computing Phi over H
+%    |H|*log|H|*M for computing Phi(X)
+%    1*H*M  for comuting Phi(gX)
+%   2*|H|*log|H|*M for computing f(X), g(X)
+% Computing overall poly
+%    3*(1*H + H log H) M for computing Phi, f, g over coset of H (Phi(gX) over coset is for free)
+%    3*2*H* M   for computing the overall poly over domain of size 2*H
+%   2*H *log(2H) = 2*H*(1+log H) *M for computing coeffs of overall poly
+% Computing quotient poly h(X) does not cost any M
+%
+% overall
+%	15*|H| + 8*|H|*log|H| Muls
+\begin{itemize}
+\item 
+The values of $f_\alpha(X), g_\alpha(X)$, $\phi(X)$ over the coset of $H$ in the multiplication domain are computed by $3$ coset FFT's, which cost overall
+\[
+3\cdot ( |H| \cdot \textsf M + |H|\log|H|\cdot (\mathsf M + \mathsf A)).
+\] 
+\item
+The left hand side of the overall identity over the multiplication domain costs 
+\[
+2\cdot |H|\cdot (4 \cdot\mathsf M + 1\cdot \mathsf A).
+\]
+\end{itemize}
+The coefficients of the left hand side of the overall identity are computed within
+\[
+2\cdot |H| \cdot \log(2\cdot |H|)\cdot (\mathsf M + \mathsf A),
+\]
+and polynomial division by $v_H(X)= X^n - 1$ costs only $|H|\cdot \mathsf A$.
+%\subsection{The multivariate inner product argument}
+Hence the total cost of the IOP is 
+\begin{equation}
+\label{e:uv:pa:cost}
+|H|\cdot  \big((8\cdot \log |H| + 2\cdot \log 2 ) \cdot (\mathsf M + \mathsf A) + 3\cdot |H|\cdot\mathsf S +  23\cdot \mathsf M + 5\cdot \mathsf A\big)
+\end{equation}
+including the cost of computing the coefficients for $h(X)$, and 
+\begin{equation}
+\label{e:UV:lookup:cost:without:h}
+|H|\cdot  \big( 6\cdot \log |H|   \cdot (\mathsf M + \mathsf A) + 3\cdot |H|\cdot\mathsf S +  23\cdot \mathsf M + 4\cdot\mathsf A \big)
+\end{equation}
+without.
+In the course of the protocol the prover provides four polynomials of size $|H|$, which are $f(X), g(X)$, $\phi(X)$ and $h(X)$.
+
+
+\subsection{Univariate Lookups}
+\label{s:uv:lookup}
+
+Let us sketch the optimized variant of the lookup IOP from \cite{Plookup} described in the blog post \cite{LookupsBlog}.
+As in the previous section, $H$ denotes the univariate domain $H = \{x\in F: x^n = 1\}$ with generator $g$.
+Suppose that $f:H\rightarrow F$ is  a function for which we want to prove that its range is contained in that of $t: H\rightarrow F$, i.e. $\{f(x)\}_{x\in H}\subseteq \{t(x)\}_{x\in H}$ as sets (with multiple recurrences removed).
+Let $(f_i)_{i=0}^{n-1}$ and $(t_i)_{i=0}^{n-1}$ denote the sequences  of values given by the index with respect to $g$, i.e. $f_i= f(g^i)$ and $t_i=f(g^i)$, and let $m_i$ be the multiplicity of $t_i$ in the sequence $(f_i)$.
+Consider the sequence
+\[
+\bar s = (\bar s_i)_{i=0}^{2n - 1} = (\underbrace{t_0, \ldots, t_0}_{1 + m_0 \text{ times}}, \underbrace{t_1, \ldots, t_1}_{1 + m_1 \text{ times}}, \ldots, \underbrace{t_{n-1}, \ldots, t_{n-1}}_{1 + m_{n-1} \text{ times}}),
+\]
+and split it into $s_0 = (\bar s_{2\cdot i})_{i=0}^{n-1}$ and  $s_1 = (\bar s_{2\cdot i+ 1})_{i=0}^{n-1}$, which we again regard as functions on $H$.
+Then
+\begin{equation}
+\label{e:uv:lookup:multiset}
+\{(s_0 (x), s_1(x)), (s_1(x), s_0(g\cdot x))\}_{x\in H} = \{ (f(x), f(x))\}_{x\in H} \cup \{(t(x), t(g\cdot x))\}_{x\in H}
+\end{equation}
+as multisets.
+Moreover,  $\{f(x)\}_{x\in H}\subseteq \{t(x)\}_{x\in H}$ if and only if there exists functions $s_0, s_0: H\rightarrow F$ satisfying the multiset identity \eqref{e:uv:lookup:multiset}.
+See  \cite{LookupsBlog} for details.
+The multiset equation \eqref{e:uv:lookup:multiset} is equivalent to the formal identity
+\begin{multline*}
+\prod_{x\in H} (X + s_0(x) + s_1(x)\cdot Y)\cdot (X + s_1(x) + s_0(g\cdot x)\cdot Y) 
+\\
+= \prod_{x\in H} (X + f(x) + f(x)\cdot Y)\cdot (X + t(x) + t(g\cdot x)\cdot Y),
+\end{multline*}
+which is reduced by random sampling $\alpha, \beta\sample F$ for $X$ and $Y$, to the grand product
+\begin{equation}
+\label{e:UV:lookup:q}
+\prod_{x\in H}  \frac{s_{0,\alpha,\beta}(x)\cdot s_{1,\alpha,\beta}(x)}{f_{\alpha,\beta}(x) \cdot t_{\alpha,\beta}(x)} = 1,
+\end{equation}
+where
+\begin{align*}
+f_{\alpha,\beta} (x) &=\alpha +  (1+\beta)\cdot f(x),
+\\
+t_{\alpha, \beta}(x) &= \alpha + t(x) + \beta\cdot t(g\cdot x),
+\\
+s_{0,\alpha,\beta}(x) &= \alpha + s_0(x) + \beta\cdot s_1(x),
+\\
+s_{1,\alpha,\beta}(x) &=  \alpha + s_1(x) + \beta\cdot s_0(g\cdot x).
+\end{align*}
+To prove the grand product, the prover sets $\phi(1) = 1$, and computes recursively $\phi(g^i )= \phi(g^{i-1})\cdot q(g^{i-1})$, for $i=1,\ldots, n-1$.
+(The grand product is equal to $1$ if and only if $\phi(g^n) = \phi(1) = 1$.)
+This leads to the following domain identities over $H$,
+\begin{multline}
+\phi(g\cdot x) \cdot (\alpha + f(x)\cdot (1+\beta))\cdot (\alpha + t(x) + t(g\cdot x)\cdot \beta) 
+\\
+- \phi(x)\cdot (\alpha + s_0(x) + s_1(x)\cdot \beta)\cdot (\alpha + s_1(x) + s_0(g\cdot x)\cdot \beta)
+= 0,
+\end{multline}
+and
+\begin{equation}
+L_H(x, 1)\cdot (\phi(x) - 1) = 0,
+\end{equation}
+where $L_H(X, Y) = \frac{1}{n}\cdot \frac{Y\cdot v_H(X) - X\cdot v_H(Y)}{X - Y}$ is the Lagrange kernel for the univariate domain $H$.
+The indentities are combined into a single one using a random $\lambda \sample F$, yielding the overall polynomial identity is
+\begin{multline*}
+\phi(g\cdot X) \cdot (\alpha + f(X) + f(X)\cdot \beta)\cdot (\alpha + t(X) + t(g\cdot X)\cdot \beta) 
+\\
+- \phi(X) \cdot (\alpha + s_0(X) + s_1(X)\cdot \beta)\cdot (\alpha + s_1(X) + s_0(g\cdot X)\cdot \beta) 
+\\
++  \lambda \cdot L_H(X, 1)\cdot (\phi(X) - 1) = 0  \mod v_H(X),
+\end{multline*}
+where $v_H(X)$ is the vanishing polynomial of $H$.
+
+Let us discuss the prover cost of this polynomial IOP.
+Computing $f_{\alpha,\beta}, t_{\alpha,\beta}, s_{0,\alpha,\beta}, s_{1,\alpha,\beta}$ over $H$ consumes 
+\[
+|H|\cdot (4\cdot \mathsf M + 7 \mathsf A),
+\]
+and $\phi(x)$ over $H$ is derived by another 
+\[
+6\cdot |H|\cdot \mathsf M,
+\] 
+using batch inversion. 
+The domain evaluation for $L_H(x, y) = \frac{1}{n}\cdot \frac{- x \cdot v_H(y)}{x- y}$ is obtained within $3\cdot |H|\cdot (3\cdot \mathsf M + \mathsf S)$ operations (again, using batch inversion).
+The coefficients of $f(X)$, $\phi(X), s_0(X), s_1(X)$ are obtained in overall  
+\[
+4\cdot |H|\cdot \log|H|\cdot (\mathsf M + \mathsf A).
+\] 
+The largest part of the prover costs is the computation of the overall quotient $h(X)$.
+Its values are computed over a suitably sized multiplication domain. 
+For simplicity, we assume its size as $3\cdot |H|$.
+The steps for computing the values of $h$ are as follows.
+\begin{itemize}
+\item 
+The values of $f(X)$, $\phi(X), s_0(X), s_1(X)$ over the two non-trivial cosets of $H$ in the multiplication domain are computed by $4$ coset FFT's, which cost overall
+\[
+4\cdot 2\cdot ( |H| \cdot \textsf M + |H|\log|H|\cdot (\mathsf M + \mathsf A))
+\] 
+\item
+The values of the numerator and denominator of $q(X)$ over the two remaining cosets of $H$ cost
+\[
+2\cdot (6 \cdot |H|\cdot \mathsf M +  |H| \cdot 7\cdot \mathsf A)  
+\]
+and the left hand side of the overall identity over the multiplication domain costs 
+\[
+3\cdot |H|\cdot (4 \cdot\mathsf M + 1\cdot\mathsf S + 1\cdot \mathsf A).
+\]
+using already existing domain evaluations.
+\end{itemize}
+The coefficients of the left hand side of the overall identity are computed within
+\[
+3\cdot |H| \cdot \log(3\cdot |H|)\cdot (\mathsf M + \mathsf A),
+\]
+and polynomial division by $v_H(X)= X^n - 1$ costs only $|H|\cdot \mathsf A$.
+%\subsection{The multivariate inner product argument}
+Hence the total cost of the IOP is 
+\begin{equation}
+\label{e:UV:lookup:cost}
+|H|\cdot  (15\cdot \log |H| + 3\log 3 + 51) \cdot (\mathsf M + \mathsf A) + 3\cdot |H|\cdot\mathsf S + 24\cdot |H|\cdot \mathsf A,
+\end{equation}
+including the cost of computing the coefficients for $h(X)$, and 
+\begin{equation}
+\label{e:UV:lookup:cost:without:h}
+|H|\cdot  (12\cdot \log |H|  + 51) \cdot (\mathsf M + \mathsf A) + 3\cdot |H|\cdot\mathsf S + 24\cdot |H|\cdot \mathsf A,
+\end{equation}
+without.
+In the course of the protocol the prover provides four polynomials of size $|H|$, which are $s_0(X), s_1(X), \phi(X)$ and $h(X)$.
+%\subsection{The multivariate variant of the \cite{Kate} commitment}
+
+
+
+\end{document}
