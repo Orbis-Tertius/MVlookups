@@ -227,8 +227,21 @@
     OPTlink = {\url{https://github.com/HorizenOfficial/ginger-lib/blob/82a9dce2220ec9d91c6978c288fe2c3dee3c0cf9/doc/Guillevic\%20-\%202020\%20-\%20A\%20note\%20on\%20MNT4-MNT6\%20curves.pdf}}
 }
 
+
+
 %%
-%% Fundamentals
+%% Hashes
+%%
+
+@INPROCEEDINGS{Poseidon,
+    author = {Lorenzo Grassi and Dmitry Khovratovich and Christian Rechberger and Arnab Roz and Markus Schofnegger},
+    title = {{POSEIDON}: A New Hash Function for Zero-Knowledge Proof Systems},
+    booktitle = {{USENIX} Security Symposium 2021},
+    year = {2021},    
+}
+
+%%
+%% IOP fundamentals 
 %%
 
 @INPROCEEDINGS{IOPs,
@@ -257,83 +270,6 @@
 	year = {2020},
 	doi = {10.1007/978-3-030-45721-1 _ 24},
 	note = {Full paper: \url{https://eprint.iacr.org/2019/1229}}
-}
-
-%%
-%% Codes and low-degree testing
-%%
-
-
-@misc{BerlekampWelch,
-	author = {Lloyd R. Welch and Elwyn R. Berlekamp},
-	title = {Error Correction for Algebraic Block Codes},
-	year = {1986},
-  	howpublished = {US Patent 4633470},
-	note = {\url{https://patents.google.com/patent/US4633470A}}
-}
-
-@inproceedings{Sudan,
-	author = {Madhu Sudan},
-	title = {Decoding of {Reed Solomon} Codes beyond the Error-Correction Bound},
-	booktitle = {Journal of Complexity},
-	volume = {13(1)},
-	year = {1997},
-	doi = {10.1006/jcom.1997.0439}
-}
-
-@inproceedings{GuruswamiSudan,
-	author = {Venkatesan Guruswami and Madhu Sudan},
-	title = {Improved Decoding of {Reed-Solomon} and Algebraic-Geometry Codes},
-	booktitle = {IEEE Trans. on Information Theory},
-	volume = {45(6)},
-	year = {1999},
-	doi = {10.1109/18.782097}
-}
-
-@inproceedings{LowDegreeTesting,
-	author = {Sanjeev Arora and Madhu Sudan},
-	title = {Improved Low-Degree Testing and its Applications},
-	booktitle = {Combinatorica},
-	volume = {23(3)},
-	year = {2003},
-	doi = {10.1007/s00493-003-0025-0}
-}
-
-@inproceedings{ListDecodingBook,
-	author = {Venkatesan Guruswami},
-	title = {Algorithmic Results in List Decoding},
-	booktitle = {Foundation and Trands in Theoretical Computer Science},
-	volume = {2(2)},
-	year = {2007},
-	doi ={10.1561/0400000007}
-}
-
-
-
-
-%%
-%% Polynomial Commitment schemes 
-%%
-
-
-@inproceedings{Redshift,
-    author    = {Assimakis Kattis and Konstantin Panarin and Alaxander Vlasov},
-    title     = {{REDSHIFT}: Transparent SNARKs from List Polynomial Commitment {IOP}s},
-    booktitle = {IACR preprint archive},
-    year      = {2019},
-    note = {\url{https://eprint.iacr.org/2019/1400}}
-}
-
-
-%%
-%% Hashes
-%%
-
-@INPROCEEDINGS{Poseidon,
-    author = {Lorenzo Grassi and Dmitry Khovratovich and Christian Rechberger and Arnab Roz and Markus Schofnegger},
-    title = {{POSEIDON}: A New Hash Function for Zero-Knowledge Proof Systems},
-    booktitle = {{USENIX} Security Symposium 2021},
-    year = {2021},    
 }
 
 %%
@@ -406,12 +342,81 @@
 }
 
 
+%%
+%% Polynomial Commitment schemes 
+%%
 
+@inproceedings{Kate,
+  author    = {Aniket Kate and Gregory M. Zaverucha and Ian Goldberg},
+  title     = {Constant-Size Commimtments to Polynomials and Their Applications},
+  booktitle = {ASIACRYPT 2010},
+  year      = {2010},
+  editor    = {Abe M.},
+  series    = {LNCS},
+  volume    = {6477},
+  publisher = {Springer}
+}
 
+@inproceedings{Redshift,
+    author    = {Assimakis Kattis and Konstantin Panarin and Alaxander Vlasov},
+    title     = {{REDSHIFT}: Transparent SNARKs from List Polynomial Commitment {IOP}s},
+    booktitle = {IACR preprint archive},
+    year      = {2019},
+    note = {\url{https://eprint.iacr.org/2019/1400}}
+}
+
+%%
+%% Codes and low-degree testing
+%%
+
+@misc{BerlekampWelch,
+	author = {Lloyd R. Welch and Elwyn R. Berlekamp},
+	title = {Error Correction for Algebraic Block Codes},
+	year = {1986},
+  	howpublished = {US Patent 4633470},
+	note = {\url{https://patents.google.com/patent/US4633470A}}
+}
+
+@inproceedings{Sudan,
+	author = {Madhu Sudan},
+	title = {Decoding of {Reed Solomon} Codes beyond the Error-Correction Bound},
+	booktitle = {Journal of Complexity},
+	volume = {13(1)},
+	year = {1997},
+	doi = {10.1006/jcom.1997.0439}
+}
+
+@inproceedings{GuruswamiSudan,
+	author = {Venkatesan Guruswami and Madhu Sudan},
+	title = {Improved Decoding of {Reed-Solomon} and Algebraic-Geometry Codes},
+	booktitle = {IEEE Trans. on Information Theory},
+	volume = {45(6)},
+	year = {1999},
+	doi = {10.1109/18.782097}
+}
+
+@inproceedings{LowDegreeTesting,
+	author = {Sanjeev Arora and Madhu Sudan},
+	title = {Improved Low-Degree Testing and its Applications},
+	booktitle = {Combinatorica},
+	volume = {23(3)},
+	year = {2003},
+	doi = {10.1007/s00493-003-0025-0}
+}
+
+@inproceedings{ListDecodingBook,
+	author = {Venkatesan Guruswami},
+	title = {Algorithmic Results in List Decoding},
+	booktitle = {Foundation and Trands in Theoretical Computer Science},
+	volume = {2(2)},
+	year = {2007},
+	doi ={10.1561/0400000007}
+}
 
 %%
 %% Univariate SNARKs, PIOPs
 %% 
+
 @inproceedings{2006:Groth,
   author    = {Jens Groth},
   title     = {Simulation-Sound {NIZK} Proofs for a Practical Language and Constant
@@ -436,17 +441,6 @@
   volume    = {6477},
   publisher = {Springer},
   doi = {10.1007/978-3-642-17373-8_19}
-}
-
-@inproceedings{Kate,
-  author    = {Aniket Kate and Gregory M. Zaverucha and Ian Goldberg},
-  title     = {Constant-Size Commimtments to Polynomials and Their Applications},
-  booktitle = {ASIACRYPT 2010},
-  year      = {2010},
-  editor    = {Abe M.},
-  series    = {LNCS},
-  volume    = {6477},
-  publisher = {Springer}
 }
 
 @inproceedings{Groth:2016,
