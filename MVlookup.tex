@@ -148,7 +148,7 @@ For example, for columns of length $2^{12}$, paper-pencil operation counts indic
 
 Lookup arguments prove a sequence of values being member of an, often prediscribed, table. 
 They are an essential tool for improving the efficiency of SNARKs for statements which are otherwise expensive to arithmetize. 
-Main applications are lookups for relations of high algebraic complexity, and interval ranges, which are extensively used by zero-knowledge virtual machines enforcing execution trace elements being valid machine words.
+Main applications are lookups for relations of high algebraic complexity, and interval ranges which are extensively used by zero-knowledge virtual machines enforcing execution trace elements being valid machine words.
 Although closely related to permutation arguments \cite{shuffle, RAMs}, a first explicit occurence of lookups dates back to \cite{Arya}.
 The break-through was achieved by Plookup \cite{Plookup}, a permutation argument based argument which improved over the one from \cite{Arya} and provided the first solution for arbitrary tables. 
 Since then Plookup (and slight variants of it) is \textit{the} general purpose lookup argument used in many practical applications, for example \cite{Aztek, Halo2, Arkworks, Cairo, Miden}. 
@@ -162,7 +162,7 @@ As in classical calculus, formal logarithmic derivatives turn products $\prod_{i
 having poles with the same multiplicity as the zeros of the product.
 Working with poles instead of zeros is extremly useful for lookup arguments.
 %This fractional decomposition of the logarithmic derivative is extremly useful for lookup arguments:
-While strategies for arguments about radicals are far from obvious, they turn trivial with logarithmic derivatives.
+While strategies for arguments about radicals of products are far from obvious, they turn trivial using logarithmic derivatives.
 Concretely, given a sequence of field elements $(a_i)_{i=1}^N$ and another sequence $(t_j)_{j=1}^M$, then $\{a_i: i =1,\ldots, N\}\subseteq \{t_j : j=1,\ldots, M\}$ as sets, if and only if there exists a sequence of field elements $(m_j)_{j=1}^M$ (the multiplicities) such that
 \begin{equation*}
 \label{e:intro:lookup:eq}
@@ -170,7 +170,7 @@ Concretely, given a sequence of field elements $(a_i)_{i=1}^N$ and another seque
 \end{equation*}
  (This holds under quite mild conditions on the field, see Lemma \ref{lem:batchsetmembership} for details.)
 %In particular for multi-column lookups, where several columns are subject to the same table, 
-Based on this fractional identity we construct lookup protocols which are more  efficient than the Plookup approach, which argues via a sorted joining of witness and table sequence.
+Based on this fractional identity we construct lookup protocols which are more  efficient than the Plookup approach, which argues via a sorted union of witness and table sequence.
 This is particularly true in the case of \textit{multi-column} lookups, where several sequences (``columns'') are subject to the same table lookup.
 %Independent on the number of columns to be looked up, one still works with a single multiplicity function. 
 In our lookup the oracle costs, measuring the number and sizes of the oracles the prover needs to provide, are significantly lower than for a lookup based on the Plookup strategy.
@@ -211,7 +211,7 @@ We expect these univariate arguments to improve similarly over multi-column look
 
 Let $F$ denote a finite field, and $F^*$ its multiplicative group.
 Throughout the document we regard the boolean hypercube $H= \{\pm 1\}^n$  as a multiplicative subgroup of  $(F^*)^n$.
-For a multivariate functions $f(X_1,\ldots, X_n)$, we will often use the vector notation $\vec X = (X_1,\ldots, X_n)$ for its arguments, writing $f(\vec X) := f(X_1,\ldots, X_n)$.
+For a multivariate function $f(X_1,\ldots, X_n)$, we will often use the vector notation $\vec X = (X_1,\ldots, X_n)$ for its arguments, writing $f(\vec X) := f(X_1,\ldots, X_n)$.
  
 
 %Given a function $f: H\rightarrow F$, its \textit{Langrange interpolation} is the unique multilinear polynomial $p(\vec X)$ in $\vec X = (X_1,\ldots, X_n)$ such that $p(\vec x) = f(\vec x)$ for every $\vec x\in H$.
@@ -482,7 +482,7 @@ We suppose that this is well-known, and therefore we omit an explicit elaboratio
 
 \subsection{The sumcheck protocol}
 
-We give a concise summary on the sumcheck protocol \cite{sumcheck} for multivariate polynomials.
+We give a concise summary on the multivariate sumcheck protocol \cite{sumcheck}.
 Given a multivariate polynomial $p(X_1,\ldots, X_n)\in F[X_1,\ldots, X_n]$, a prover wants to convince a verifier upon that
 \begin{equation*}
 s = \sum_{(x_1,\ldots, x_n) \in \{\pm 1\}^n} p(x_1, \ldots, x_n).
@@ -667,7 +667,7 @@ m(\vec x) =
 The plot for proving that $\bigcup_{i=1}^M \{f_i(\vec x)\}_{\vec x\in H}\subseteq \{t(\vec x)\}_{\vec x\in H}$ is as follows.
 Given a random challenge $x\sample F$, the prover shows that the rational identity \eqref{e:lookup:fractional:identity} holds at $X= x$, whenever evaluation is possible. 
 However, in order to make \eqref{e:lookup:fractional:identity} applicable to the sumcheck argument, the prover needs to provide multilinear helper functions for the rational expressions. 
-We shall discuss two different different approaches to do that.
+We shall discuss two different different approaches for doing that.
 In  the first one, explained in Section \ref{s:lookup:small}, we use a single multilinear function for the entire fractional expression in \eqref{e:lookup:fractional:identity}, which is subject to a domain identity over $H$ which has $\bigO{M}$ variables and absolute degree $\bigO{M}$.
 This will lead to a protocol with a $\bigO{M^2}$ prover. 
 However, if $M$ is not too large this approach will be more performant than the second one, discussed in Section \ref{s:lookup:large}, in which we essentially use helper functions for each of the reciprocals $\frac{1}{x + f_i(\vec x)}$, and $\frac{1}{x + t(\vec x)}$. 
@@ -1015,10 +1015,11 @@ $M$ & 114 & 95 & 81 & 73
 \section{Lookups based on the Hyperplonk shift}
 \label{s:hyperplonk}
 
-In this section we informally discuss multi-column lookups using the time shift from Hyperplonk+ \cite{Hyperplonk}. 
+In this section we informally discuss multi-column lookups based on the Plookup strategy and the time shift from Hyperplonk+ \cite{Hyperplonk}. 
 We  give detailed operation counts and compare with our lookup arguments from Section \ref{s:lookups}.
 
-Hyperplonk \cite{Hyperplonk} introduces a time shift $T: H\rightarrow H$ which is derived from the multiplication by a primitive root in $GF(2^n)$, 
+On of the main contributions of \cite{Hyperplonk} is the introduction of an (almost) transitive time shift $T: H\rightarrow H$ which translates to multilinear extensions in a tame manner.  
+The shift is derived from the multiplication by a primitive root in $GF(2^n)$, 
 \[
 T(x_1, \ldots, x_n) = \frac{1 + x_n}{2} \cdot (1, x_1,\ldots, x_{n-1}) + \frac{1 - x_n }{2} \cdot (- 1,(-1)^{1 - c_1}\cdot x_1,\ldots, (-1)^{1 - c_{n - 1}}\cdot x_{n-1}),
 \]  
@@ -1030,8 +1031,8 @@ f(T(x_1, \ldots, x_n)) =  \frac{1 + x_n}{2} \cdot f(1, x_1,\ldots, x_{n-1}) + \f
 \end{equation}
 
 %Although the Hyperplonk lookup uses the , 
-Using the time shift $T$ allows for the same strategy as in the well-known univariate case \cite{Plookup}, which for the sake of completness recap in Appendix \ref{s:uv:lookup}.
-In short, the argument is based on the fact that, given two sequences of field elements $(a_i)_{i=0}^{N-1}$ and $(t_i)_{i=0}^{N-1}$, then $\{a_i : j= 0,\ldots, N-1\}\subseteq \{t_i : i = 0, \ldots, N-1\}$ as sets, if and only if there exists a sequence $(s_i)_{i=0}^{2N-1}$ of double the size, which satisfies the lookup identity
+Using the time shift $T$ allows for the same strategy for the univariate Plookup argument. (See Appendix \ref{s:uv:lookup} for a recap.)
+The argument is based on the fact that, given two sequences of field elements $(a_i)_{i=0}^{N-1}$ and $(t_i)_{i=0}^{N-1}$, then $\{a_i : j= 0,\ldots, N-1\}\subseteq \{t_i : i = 0, \ldots, N-1\}$ as sets, if and only if there exists a sequence $(s_i)_{i=0}^{2N-1}$ of double the size, which satisfies the lookup identity
 \begin{equation}
 \label{e:lookup:Gabizon}
 \prod_{i=0}^{N-1} (X + s_{i}+ s_{i+1\bmod N}\cdot Y)
@@ -1043,7 +1044,7 @@ We again discuss two approaches\footnotemark for dealing with the grand product 
 We point out that the presented strategies slightly differ from the one in \cite{Hyperplonk}, which uses the more expensive grand product argument from \cite{Quarks}.
 }
 The first one applies a batched grand product argument over $H$, independent of $M$ the number of columns, leading to a $\bigO{M^2}$ prover for similar reasons as Protocol \ref{prot:lookup} does.
-The second one proves the grand product argument over an extended hypercube $\bar H$ of size $M\cdot |H|$, which on the one hand leads to ``larger'' functions to be provided, but on the other hand has a $\bigO M$ prover which outperforms the first approach at a high number of columns.
+The second one proves the grand product argument over an extended hypercube $\bar H$ of size $M\cdot |H|$, which on the one hand leads to larger functions to be provided, but on the other hand has a $\bigO M$ prover which outperforms the first approach at a high number of columns.
 
  
 %In terms of performance both are equivalent.)
@@ -1054,7 +1055,7 @@ The second one proves the grand product argument over an extended hypercube $\ba
 Let $t: H'\rightarrow F$ be the lookup table, and $f_i:  H'\rightarrow F$, $i=1,\ldots,M$, the functions subject to the lookup.
 Although the functions are defined over the punctuated hypercube $H'$, we assume arbitrary values at $\vec 1$.
 (These will be ignored by the lookup argument.)
-The prover provides the ordered merge of the $f_i$  together with $t$ via additional functions $s_i: H'\rightarrow F$, $i=1,\ldots, M+1$, subject to the lookup identity
+The prover provides the ordered merge of the $f_i$  together with $t$ via additional functions $s_i: H'\rightarrow F$, $i=1,\ldots, M+1$, subject to the generalized lookup identity
 \begin{multline*}
 \prod_{\vec x\in H'} \prod_{i=1}^{M} (X + s_{i}(\vec x) + s_{i+1}(\vec x)\cdot Y)\cdot (X + s_{M+1}(\vec x) + s_1(T(\vec x))\cdot Y)
 \\
@@ -1066,7 +1067,7 @@ The identity is reduced to a grand product over $H'$ using random samples $\alph
 \]
 where 
 \[
-h(\vec x) = \frac{\alpha + s_{M+1}(\vec x) + s_1(\sigma(\vec x))\cdot \beta}{\alpha + g(\vec x) + g(\sigma(\vec x))\cdot \beta}\cdot 
+h(\vec x) = \frac{\alpha + s_{M+1}(\vec x) + s_1(T(\vec x))\cdot \beta}{\alpha + t(\vec x) + t(T(\vec x))\cdot \beta}\cdot 
 \prod_{i=1}^M \frac{(\alpha + s_i(\vec x) + s_{i+1}(\vec x)\cdot \beta)}{
 (\alpha + f_i(\vec x) + f_i(\vec x)\cdot \beta)}.
 \]
@@ -1083,23 +1084,21 @@ The prover computes the cumulative products of the values $h(\vec x)$ along the 
 \phi\big(T^{k}(-\vec 1)\big) = \phi\big(T^{k-1}(-\vec 1)\big) \cdot h\big(T^{k-1}(-\vec 1)\big),
 \]
 for $k=1, \ldots, |H|-1$.
-At the remaining point $\vec x = \vec 1$ outside $H'$, we set $\phi(\vec x)$ to zero.
+At the remaining point $\vec x = \vec 1$ outside $H'$, the prover sets $\phi(\vec x)$ to zero.
 Correctness of the grand product is proven by the constraint on its initial value $\phi(-\vec 1) = 1$, and the domain identity
 \begin{equation}
 \phi(T( \vec x)) \cdot  \tau(\vec x)\cdot \prod_{i=1}^M  \varphi_{i}(\vec x) 
 - \phi(\vec x)\cdot \sigma_{M+1}(\vec x)\cdot \prod_{i=1}^M \sigma_{i}(\vec x)
 = 0, 
 \end{equation}
-for all $\vec x \in H$, where for $i=1,\ldots, M$, we use the notation
+for all $\vec x \in H$, where $\tau(\vec x) = \alpha + t(\vec x) + \beta\cdot t(T( \vec x))$ and
 \begin{align*}
 \varphi_{i} (\vec x) &=\alpha +  (1+\beta)\cdot f_i(\vec x),
 \\
 \sigma_{i}(\vec x) &= \alpha + s_i(\vec x) + \beta\cdot s_{i+1}(\vec x), 
 \end{align*}
-and
-$\sigma_{M+1}(\vec x) =  \alpha + s_{M+1}(\vec x) + \beta\cdot s_1(T( \vec x))$,
-$\tau(\vec x) = \alpha + t(\vec x) + \beta\cdot t(T( \vec x))$.
-As in Protocol \ref{prot:lookup}, both constraints on $\phi$ are reduced to sumchecks over $H$ by help of the Lagrange polynomials $L_H(\:.\:, \vec y)$, $\vec y\sample F^n$, and $L_H(\:.\:, -\vec 1)$, and combined into a single one by a batching randomness $\lambda\sample F$.
+ for $i=1,\ldots, M$, except $\sigma_{M+1}(\vec x) =  \alpha + s_{M+1}(\vec x) + \beta\cdot s_1(T( \vec x))$.
+As in Protocol \ref{prot:lookup}, both constraints on $\phi$, the initial value condition and the domain identity, are reduced to sumchecks over $H$ by help of the Lagrange polynomials $L_H(\:.\:, -\vec 1)$ and $L_H(\:.\:, \vec y)$, where $\vec y\sample F^n$, and then combined into a single one by a batching randomness $\lambda\sample F$.
 The resulting overall sumcheck is
 \[
 \sum_{\vec x\in H} Q(L_H(\vec x, \vec y), L_H(\vec x, -\vec 1),  \tau(\vec x), \varphi_{1}(\vec x),\ldots, \varphi_{M}(\vec x), \sigma_{1}(\vec x),\ldots, \sigma_{M+1}(\vec x),  \phi(\vec x), \phi(T(\vec x))) = 0,
@@ -1119,12 +1118,13 @@ Its arithmetic complexities are $|Q_\mathsf M|= 2\cdot(M+1) + 3$, $|Q_\mathsf S|
 
 \subsubsection*{Prover costs}
 
-The prover cost are as follows.
+The prover cost for the multi-colum Plookup is as follows.
 Computing the values for $\tau$ and all $\varphi_i,  \sigma_i$ over $H$ consumes overall
 \[
 |H|\cdot (2\cdot(M+1)\cdot \mathsf M + (3 M+ 4)\cdot \mathsf A),
 \]
-and $\phi(x)$ over $H$ is derived by another  $|H|\cdot (2\cdot M + 3)\cdot \mathsf M$ (again, using batch inversion). 
+the quotient $h(\vec x)$ is obtained within $|H|\cdot (2\cdot M + 4)\cdot\mathsf M$, using batch inversion.
+From these values $\phi(x)$ over $H$ is derived by another  $|H|\cdot \mathsf M$.
 The domain evaluation for $L_H(\vec X, \vec y)$ is obtained within $|H|\cdot (\mathsf M + \mathsf A)$ operations, and the sumcheck costs
 \begin{equation*}
 |H| \cdot \left(1-\frac{1}{|H|}\right)\cdot \big((4\cdot M^2 + 25\cdot M + 38)\cdot \mathsf M +  (6\cdot M + 20)\cdot\textsf S + (2\cdot M^2 + 14\cdot M + 26) \cdot \textsf A\big).
@@ -1132,7 +1132,7 @@ The domain evaluation for $L_H(\vec X, \vec y)$ is obtained within $|H|\cdot (\m
 Neglecting the $\nicefrac{1}{|H|}$-term, the overall cost of the prover is 
 \begin{equation}
 \label{e:hyperplonk:cost}
-|H| \cdot  \big((4\cdot M^2 + 27\cdot M + 40)\cdot \mathsf M +  (6\cdot M + 20)\cdot\textsf S + (2\cdot M^2 + 17\cdot M + 30) \cdot \textsf A\big).
+|H| \cdot  \big((4\cdot M^2 + 29\cdot M + 46)\cdot \mathsf M +  (6\cdot M + 20)\cdot\textsf S + (2\cdot M^2 + 17\cdot M + 31) \cdot \textsf A\big).
 \end{equation}
 This is comparable with \eqref{e:lookup:cost}, but does not take into account that the prover needs to supply a total of $M+1$ functions over $H$ instead of two. 
 
@@ -1149,7 +1149,7 @@ Using the patched  function
 \[
 f(\vec y, \vec x) = \sum_{\vec z \in \{\pm 1\}^m\setminus\{\vec 1\}} L_m(\vec y, \vec z)\cdot f_{\vec z}(\vec x),
 \]
-over $\bar H$, where $L_m$ is the Lagrange kernel for $\{\pm 1\}^m$, the Gabizon identity at random $(\alpha,\beta)\sample F^2$ reads now as
+over $\bar H$, where $L_m$ is the Lagrange kernel for $\{\pm 1\}^m$, the lookup identity at random $(\alpha,\beta)\sample F^2$ reads now as
 \[
 \prod_{(\vec y, \vec x)\in \bar H'}  (\alpha + s(\vec y, \vec x) + \beta\cdot s(T_{\bar H} (\vec y, \vec x))) = \prod_{(\vec y, \vec x)\in \bar H'}  (\alpha + (1 + \beta)\cdot f(\vec y, \vec x) + L_{m}(\vec y, \vec 1)\cdot (t(\vec x) + \beta \cdot t(T_H(\vec x))),
 \]
@@ -1195,10 +1195,7 @@ The polynomial $Q$ has $\nu=6$ variables, absolute degree $d=3$, and its arithme
 
 \subsubsection*{Prover cost}
 
-Computing the values of the patched function $\varphi$  over $\bar H$ takes 
-\[
-|\bar H |\cdot (1\cdot \mathsf M + 2\cdot \mathsf A),
-\]
+Computing the values of the patched function $\varphi$  over $\bar H$ takes $|\bar H |\cdot (1\cdot \mathsf M + 2\cdot \mathsf A)$,
 and the same number of operations are needed for $\sigma$.
 The quotient $h$ over $\bar H$ is obtained by batch inversion, consuming
 \[
@@ -1215,7 +1212,6 @@ Neglecting the $\frac{1}{|\bar H|}$-term, the overall cost of the prover is
 (M+1)\cdot |H| \cdot (45 \cdot \mathsf M + 20 \cdot \mathsf S + 30\cdot\mathsf A),
 \end{equation}
 whereas it needs to provide the functions $s$ and $\phi$ over $\bar H$, which amounts the equivalent of $2\cdot (M+1)$ functions over $|H|$.
-
 Based on our benchmark-backed equivalent number of field operations for a multi-scalar multiplications (Table \ref{tab:pippenger}), we obtain the following break even points.
 \begin{table}[h!]
 \caption{%
@@ -1239,7 +1235,7 @@ The main advantage of logarithmic derivative lookups over the ones from the curr
 That oracle costs depend on the used commitment scheme.
 To give an estimate for these costs in the case of an elliptic curve based Lagrange commitment scheme (such as the IPA), we 
 rely on a benchmark-backed equivalent of field multiplications for the multi-scalar multiplication in the Pallas curve.
-These are as follows.
+These are found in Table \ref{tab:pippenger}.
 
 \begin{table}[h!]
 \caption{%
@@ -1305,67 +1301,66 @@ $\log|H|$ & $r\geq 3$ & $r\geq 2$ & $r_{max}$
 \subsection{Univariate Lookups}
 \label{s:uv:lookup}
 
-Let us sketch the optimized variant of the lookup IOP from \cite{Plookup} described in the blog post \cite{LookupsBlog}.
-As in the previous section, $H$ denotes the univariate domain $H = \{x\in F: x^n = 1\}$ with generator $g$.
-Suppose that $f:H\rightarrow F$ is  a function for which we want to prove that its range is contained in that of $t: H\rightarrow F$, i.e. $\{f(x)\}_{x\in H}\subseteq \{t(x)\}_{x\in H}$ as sets (with multiple recurrences removed).
-Let $(f_i)_{i=0}^{n-1}$ and $(t_i)_{i=0}^{n-1}$ denote the sequences  of values given by the index with respect to $g$, i.e. $f_i= f(g^i)$ and $t_i=f(g^i)$, and let $m_i$ be the multiplicity of $t_i$ in the sequence $(f_i)$.
+Let us sketch Plookup variant from \cite{Plookup} described in the blog post \cite{LookupsBlog}, generalized to the case of multi-column lookups.
+Here, the set $H$ denotes the univariate domain $H = \{x\in F: x^n = 1\}$ with generator $g$.
+Suppose that $f_i:H\rightarrow F$, $i=0, \ldots, M-1$,  are functions for which we want to prove that its range is contained in that of $t: H\rightarrow F$, i.e. $\bigcup_{i=0}^{M-1} \{f_i(x)\}_{x\in H}\subseteq \{t(x)\}_{x\in H}$ as sets.
+Let $(f_{i,k})_{k = 0}^{n-1}$ and $(t_k)_{k=0}^{n-1}$ denote the sequences  of values given by the index with respect to $g$, i.e. $f_{i,k}= f(g^k)$ and $t_k=f(g^j)$, and let $m_k$ be the overall multiplicity of $t_k$ in the union (or, concatenation) of the sequences $(f_{i,k})_i$, $i=1,\ldots, M$.
 Consider the sequence
 \[
-\bar s = (\bar s_i)_{i=0}^{2n - 1} = (\underbrace{t_0, \ldots, t_0}_{1 + m_0 \text{ times}}, \underbrace{t_1, \ldots, t_1}_{1 + m_1 \text{ times}}, \ldots, \underbrace{t_{n-1}, \ldots, t_{n-1}}_{1 + m_{n-1} \text{ times}}),
+\bar s = (\bar s_i)_{i=0}^{(M + 1)\cdot n - 1} = (\underbrace{t_0, \ldots, t_0}_{1 + m_0 \text{ times}}, \underbrace{t_1, \ldots, t_1}_{1 + m_1 \text{ times}}, \ldots, \underbrace{t_{n-1}, \ldots, t_{n-1}}_{1 + m_{n-1} \text{ times}}),
 \]
-and split it into $s_0 = (\bar s_{2\cdot i})_{i=0}^{n-1}$ and  $s_1 = (\bar s_{2\cdot i+ 1})_{i=0}^{n-1}$, which we again regard as functions on $H$.
+and split it into $(M+1)$ sequences of length $n$,  
+\[
+s_i = (\bar s_{i + k\cdot (M+1)})_{k = 0}^{n-1},
+\] 
+with $i= 0, \ldots, M$.
+We regard these sequences again as functions on $H$.
 Then
 \begin{equation}
 \label{e:uv:lookup:multiset}
-\{(s_0 (x), s_1(x)), (s_1(x), s_0(g\cdot x))\}_{x\in H} = \{ (f(x), f(x))\}_{x\in H} \cup \{(t(x), t(g\cdot x))\}_{x\in H}
+\bigcup_{i=0}^{M-1} \{s_i(x), s_{i+1}(x) \}_{x\in H} \cup \{(s_M(x), s_0(g\cdot x))\}_{x\in H} = \bigcup_{i=0}^{M-1}\{ (f_i(x), f_i(x))\}_{x\in H} \cup \{(t(x), t(g\cdot x))\}_{x\in H}
 \end{equation}
 as multisets.
-Moreover,  $\{f(x)\}_{x\in H}\subseteq \{t(x)\}_{x\in H}$ if and only if there exists functions $s_0, s_0: H\rightarrow F$ satisfying the multiset identity \eqref{e:uv:lookup:multiset}.
-See  \cite{LookupsBlog} for details.
+Moreover, this multiset equality is in fact equivalent to $\bigcup_{i=0}^{M-1}\{f_i(x)\}_{x\in H}\subseteq \{t(x)\}_{x\in H}$.
+The set inclusion holds if and only if there exists functions $s_0,\ldots, s_M: H\rightarrow F$ satisfying \eqref{e:uv:lookup:multiset}. %See  \cite{LookupsBlog} for details.
 The multiset equation \eqref{e:uv:lookup:multiset} is equivalent to the formal identity
 \begin{multline*}
-\prod_{x\in H} (X + s_0(x) + s_1(x)\cdot Y)\cdot (X + s_1(x) + s_0(g\cdot x)\cdot Y) 
+\prod_{x\in H} \prod_{i=0}^{M-1} (X + s_i(x) + s_{i+1}(x)\cdot Y)\cdot (X + s_M(x) + s_0(g\cdot x)\cdot Y) 
 \\
-= \prod_{x\in H} (X + f(x) + f(x)\cdot Y)\cdot (X + t(x) + t(g\cdot x)\cdot Y),
+= \prod_{x\in H} \prod_{i=0}^{M-1} (X + f_i(x) + f_i(x)\cdot Y)\cdot (X + t(x) + t(g\cdot x)\cdot Y),
 \end{multline*}
 which is reduced by random sampling $\alpha, \beta\sample F$ for $X$ and $Y$, to the grand product
 \begin{equation}
 \label{e:UV:lookup:q}
-\prod_{x\in H}  \frac{s_{0,\alpha,\beta}(x)\cdot s_{1,\alpha,\beta}(x)}{f_{\alpha,\beta}(x) \cdot t_{\alpha,\beta}(x)} = 1,
+\prod_{x\in H}  \frac{\sigma_{M}(x)}{\tau(x)}\cdot \prod_{i=0}^{M-1} \frac{\sigma_{i}(x)}{\varphi_{i}(x)}   = 1,
 \end{equation}
-where
+where $\tau(x) = \alpha + t(x) + \beta\cdot t(g\cdot x)$, and 
 \begin{align*}
-f_{\alpha,\beta} (x) &=\alpha +  (1+\beta)\cdot f(x),
+\varphi_i (x) &=\alpha +  (1+\beta)\cdot f_i(x),
 \\
-t_{\alpha, \beta}(x) &= \alpha + t(x) + \beta\cdot t(g\cdot x),
-\\
-s_{0,\alpha,\beta}(x) &= \alpha + s_0(x) + \beta\cdot s_1(x),
-\\
-s_{1,\alpha,\beta}(x) &=  \alpha + s_1(x) + \beta\cdot s_0(g\cdot x).
+\sigma_{i}(x) &= \alpha + s_i(x) + \beta\cdot s_{i+1}(x),
 \end{align*}
-To prove the grand product, the prover sets $\phi(1) = 1$, and computes recursively $\phi(g^i )= \phi(g^{i-1})\cdot q(g^{i-1})$, for $i=1,\ldots, n-1$.
-(The grand product is equal to $1$ if and only if $\phi(g^n) = \phi(1) = 1$.)
+for $i=0,\ldots, M-1$, except for $\sigma_{M}(x) =  \alpha + s_M(x) + \beta\cdot s_0(g\cdot x)$.
+To prove the grand product over the quotients $h(x) =  \frac{\sigma_{M}(x)}{\tau(x)}\cdot \prod_{i=0}^{M-1} \frac{\sigma_{i}(x)}{\varphi_{i}(x)} $, the prover sets $\phi(1) = 1$, and computes recursively $\phi(g^i )= \phi(g^{i-1})\cdot h(g^{i-1})$, for $i=1,\ldots, n-1$.
+(Recall that the grand product is equal to $1$ if and only if $\phi(g^n) = \phi(1) = 1$.)
 This leads to the following domain identities over $H$,
-\begin{multline}
-\phi(g\cdot x) \cdot (\alpha + f(x)\cdot (1+\beta))\cdot (\alpha + t(x) + t(g\cdot x)\cdot \beta) 
-\\
-- \phi(x)\cdot (\alpha + s_0(x) + s_1(x)\cdot \beta)\cdot (\alpha + s_1(x) + s_0(g\cdot x)\cdot \beta)
+\begin{equation*}
+\phi(g\cdot x) \cdot \tau(x) \cdot \prod_{i=0}^{M-1} \varphi_i (x)
+- \phi(x)\cdot \prod_{i=0}^M \sigma_i (x)
 = 0,
-\end{multline}
+\end{equation*}
 and
-\begin{equation}
+\begin{equation*}
 L_H(x, 1)\cdot (\phi(x) - 1) = 0,
-\end{equation}
+\end{equation*}
 where $L_H(X, Y) = \frac{1}{n}\cdot \frac{Y\cdot v_H(X) - X\cdot v_H(Y)}{X - Y}$ is the Lagrange kernel for the univariate domain $H$.
 The indentities are combined into a single one using a random $\lambda \sample F$, yielding the overall polynomial identity is
-\begin{multline*}
-\phi(g\cdot X) \cdot (\alpha + f(X) + f(X)\cdot \beta)\cdot (\alpha + t(X) + t(g\cdot X)\cdot \beta) 
-\\
-- \phi(X) \cdot (\alpha + s_0(X) + s_1(X)\cdot \beta)\cdot (\alpha + s_1(X) + s_0(g\cdot X)\cdot \beta) 
-\\
+\begin{equation*}
+\phi(g\cdot x) \cdot \tau(x) \cdot \prod_{i=0}^{M-1} \varphi_i (x)
+- \phi(x)\cdot \prod_{i=0}^M \sigma_i (x)
 +  \lambda \cdot L_H(X, 1)\cdot (\phi(X) - 1) = 0  \mod v_H(X),
-\end{multline*}
-where $v_H(X)$ is the vanishing polynomial of $H$.
+\end{equation*}
+where $v_H(X) = X^n - 1$ is the vanishing polynomial of $H$.
 
 %Let us discuss the prover cost of this polynomial IOP.
 %Computing $f_{\alpha,\beta}, t_{\alpha,\beta}, s_{0,\alpha,\beta}, s_{1,\alpha,\beta}$ over $H$ consumes 
