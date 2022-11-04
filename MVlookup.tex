@@ -117,7 +117,7 @@ Orbis Labs
 \begin{document}
 %\frontmatter
 \title{%
-Multivariate multi-column lookups based on
+Multivariate lookups based on
 logarithmic derivatives
 }
 \date{%
@@ -130,11 +130,11 @@ logarithmic derivatives
 
 \begin{abstract}
 Logarithmic derivatives translate products of linear factors into sums of their reciprocals, turning zeroes into simple poles of same multiplicity.
-Based on this simple fact, we construct an interactive oracle proof for multi-column lookups over the boolean hypercube, which makes use of a single multiplicity function instead of working with a rearranged union of table and witness.
+Based on this simple fact, we construct an interactive oracle proof for multi-column lookups over the boolean hypercube, which makes use of a single multiplicity function instead of working with a rearranged union of table and witnesses.
 For single-column lookups the performance is comparable to the well-known \cite{Plookup} strategy used by Hyperplonk+ \cite{Hyperplonk}.
 However, the real power of our argument unfolds in the case of batch lookups when multiple columns are subject to a single-table lookup:  
-While the number of field operations is comparable to the Hyperplonk+ lookup (extended to multiple columns), the provided by our prover are much less expensive. 
-For example, for columns of length $2^{12}$, paper-pencil operation counts indicate that the logarithmic derivative lookup is $1.5$ -- $2.5$ times faster, depending on the number of columns.
+While the number of field operations is comparable to the Hyperplonk+ lookup (extended to multiple columns), the oracles provided by our prover are much less expensive. 
+For example, for columns of length $2^{12}$, paper-pencil operation counts indicate that the logarithmic derivative lookup is between $1.5$ and $4$ times faster, depending on the number of columns.
 \end{abstract}
 
 %Keywords: SNARKs, recursive proofs, aggregation scheme
@@ -146,20 +146,73 @@ For example, for columns of length $2^{12}$, paper-pencil operation counts indic
 %\mainmatter
 \section{Introduction}
 
+Lookup arguments prove a sequence of values being member of an, often prediscribed, table. 
+They are an essential tool for improving the efficiency of SNARKs for statements which are otherwise expensive to arithmetize. 
+Main applications are lookups for relations of high algebraic complexity, and interval ranges, which are extensively used by zero-knowledge virtual machines enforcing execution trace elements being valid machine words.
+Although closely related to permutation arguments \cite{shuffle, RAMs}, a first explicit occurence of lookups dates back to \cite{Arya}.
+The break-through was achieved by Plookup \cite{Plookup}, a permutation argument based argument which improved over the one from \cite{Arya} and provided the first solution for arbitrary tables. 
+Since then Plookup (and slight variants of it) is \textit{the} general purpose lookup argument used in many practical applications, for example \cite{Aztek, Halo2, Arkworks, Cairo, Miden}. 
+%That strategy, which we call the Plookup strategy in the sequel, uses a rearranged concatenation of witness and table sequence
+
+In this paper we describe a lookup argument based which is based on logarithmic derivatives instead of permutation arguments. 
+As in classical calculus, formal logarithmic derivatives turn products $\prod_{i=1}^N (X - z_i)$ into sums of their reciprocals, 
+\[
+\sum_{i=1}^N \frac{1}{X - z_i},
+\]
+having poles with the same multiplicity as the zeros of the product.
+Working with poles instead of zeros is extremly useful for lookup arguments.
+%This fractional decomposition of the logarithmic derivative is extremly useful for lookup arguments:
+While strategies for arguments about radicals are far from obvious, they turn trivial with logarithmic derivatives.
+Concretely, given a sequence of field elements $(a_i)_{i=1}^N$ and another sequence $(t_j)_{j=1}^M$, then $\{a_i: i =1,\ldots, N\}\subseteq \{t_j : j=1,\ldots, M\}$ as sets, if and only if there exists a sequence of field elements $(m_j)_{j=1}^M$ (the multiplicities) such that
+\begin{equation*}
+\label{e:intro:lookup:eq}
+\sum_{i=1}^N \frac{1}{X - a_i}  = \sum_{j=1}^M \frac{m_j}{X - t_j}.
+\end{equation*}
+ (This holds under quite mild conditions on the field, see Lemma \ref{lem:batchsetmembership} for details.)
+%In particular for multi-column lookups, where several columns are subject to the same table, 
+Based on this fractional identity we construct lookup protocols which are more  efficient than the Plookup approach, which argues via a sorted joining of witness and table sequence.
+This is particularly true in the case of \textit{multi-column} lookups, where several sequences (``columns'') are subject to the same table lookup.
+%Independent on the number of columns to be looked up, one still works with a single multiplicity function. 
+In our lookup the oracle costs, measuring the number and sizes of the oracles the prover needs to provide, are significantly lower than for a lookup based on the Plookup strategy.
+For large numbers of columns it is the half, while the arithmetic costs of the interactive oracle prover remain comparable.
+%Although our implementation is not ready yet, we compare the two strategies by detailed operation counts, using a benchmark-backed measure for the cost of multi-scalar multiplications in terms of field multiplications.  
+%For columns of length $2^{12}$, and considering an elliptic curve over a 256 bit large prime field, our counts indicate a speedup by a factor between $1.5$ and $2.5$, depending on $M$ the number of columns. 
+%(For a large numbers of columns this factor is independent of $M$ and about $1.8$.) 
+%Although we describe our lookups in the multivariate setting, we point out  
+
+We stress the fact that we are not the only ones who exploit fractional decompositions for lookups. 
+Concurrently, improving the work of \cite{Caulk} and \cite{CaulkPlus}, Gabizon et al. \cite{flookup} use fractional decompositions for ``large-table'' lookups, the proving-time of which is independent of the table size. 
+%Although large-table lookups is a more advanced topic, 
+This use case is perpendicular to ours.
+We focus on multi-column lookups with respect to a single, in practice medium-sized table, a use case that is extensively used in execution trace proofs.
+
+The document is organized as follows. 
+In Section \ref{s:preliminaries}, we gather the preliminaries used in the sequel: 
+The Lagrange kernel over the boolean hypercube,  basic facts on the formal logarithmic derivative, and a summary of the multivariate sumcheck argument. 
+Besides that, we introduce Lagrange interactive oracle proofs, an oracle model we consider the best fit for arguments which are based on the Lagrange representation of polynomials rather than their coefficients.   
+In Section \ref{s:lookups} we describe our multi-column lookup based on the logarithmic derivative. 
+The protocol comes in two variants, one for a ``small'' number of columns, and another one which performs better for large numbers of columns (and is asymptotically linear in the instance size). 
+For comparison reasons, we add an extra section (Section \ref{s:hyperplonk}) in which we sketch multi-column lookups using the Plookup strategy, adapted to the boolean hypercube. 
+These rely on the time shift from Hyperplonk \cite{Hyperplonk}, and we consider them state-of-the-art in the multivariate setting.
+%Eventually, in Appendix \ref{s:appendix} we recap the univariate Plookup argument, sketch inner product arguments for Lagrange queries,  and show how to turn the multivariate KZG \cite{Kate} commitment scheme into a scheme for Lagrange queries, which does not access the coefficients at any point in time.
+
+We finally point out, that although our protocols are written for the multilinear setting,  their translation into univariate proofs is straight-forward.
+We expect these univariate arguments to improve similarly over multi-column lookups based on the Plookup strategy.
+
+
+
+
+
+
 \section{Preliminaries}
+\label{s:preliminaries}
 
 \subsection{The Lagrange kernel of the boolean hypercube}
 
 Let $F$ denote a finite field, and $F^*$ its multiplicative group.
-Throughout the document we regard the boolean hypercube 
-\[
-H= \{\pm 1\}^n
-\] 
-as a multiplicative subgroup of  $(F^*)^n$.
-For a multivariate polynomial $p(X_1,\ldots, X_n)\in F[X_1,\ldots, X_n]$, we will often use the vector notation $\vec X = (X_1,\ldots, X_n)$ for its arguments, writing 
-\[
-p(\vec X) := p(X_1,\ldots, X_n).
-\] 
+Throughout the document we regard the boolean hypercube $H= \{\pm 1\}^n$  as a multiplicative subgroup of  $(F^*)^n$.
+For a multivariate functions $f(X_1,\ldots, X_n)$, we will often use the vector notation $\vec X = (X_1,\ldots, X_n)$ for its arguments, writing $f(\vec X) := f(X_1,\ldots, X_n)$.
+ 
 
 %Given a function $f: H\rightarrow F$, its \textit{Langrange interpolation} is the unique multilinear polynomial $p(\vec X)$ in $\vec X = (X_1,\ldots, X_n)$ such that $p(\vec x) = f(\vec x)$ for every $\vec x\in H$.
 %As $H$ has an increasing sequence of subgroups $\{1\} = H_0\subset H_1 \subset \ldots \subset H_n = H$, each $H_i$ having order $|H_i| = 2^i$,  Lagrange interpolation can be done in only $2^n$ field multiplications\footnotemark and $n\cdot 2^n$ additions and substractions, compared to $n\cdot 2^{n-1}$ multiplications and additions as for univariate interpolation from order $2^n$ subgroups of $F^*$.
@@ -167,20 +220,19 @@ p(\vec X) := p(X_1,\ldots, X_n).
 %The field multiplications are due to the normalization of $f$ by the factor $\frac{1}{2^n}$, and can be entirely omitted an IOP. 
 %One ``commits'' to the non-normalized Lagrange interpolant and corrects the queried evaluations.
 %}%
-%See Appendix \ref{s:Appendix} for details. 
-
+%See Appendix \ref{s:appendix} for details. 
 The \textit{Lagrange kernel} of $H$ is the multilinear polynomial
 \begin{equation}
 \label{e:LagrangeKernel}
 L_H(\vec X, \vec Y)  = \frac{1}{2^n}\cdot \prod_{j=1}^n (1 + X_j\cdot Y_j).
 \end{equation}
-Notice that $L_H(\vec X, \vec Y)$ is symmetric, i.e. $L_H(\vec X, \vec Y)=L_H(\vec Y, \vec X)$, and that the product representation \eqref{e:LagrangeKernel} allows for evaluating with only $\bigO{\log|H|}$ field operations.
-Whenever $\vec y \in H$ we have that $L_H(\vec X, \vec y)$ is the Lagrange polynomial on $H$, i.e. the unique multilinear polynomial which satisfies $L_H(\vec x, \vec y) = 1$ at $\vec x = \vec y$, and zero elsewhere on $H$.
-In particular for any function $f: H\longrightarrow F$  we have the inner product evaluation formula 
+Notice that $L_H(\vec X, \vec Y)$ is symmetric in $\vec X$ and $\vec Y$, i.e. $L_H(\vec X, \vec Y)=L_H(\vec Y, \vec X)$, and that \eqref{e:LagrangeKernel} is evaluated within only $\bigO{\log|H|}$ field operations.
+Whenever $\vec y \in H$ we have that $L_H(\vec X, \vec y)$ is the Lagrange polynomial on $H$, which is the unique multilinear polynomial which satisfies $L_H(\vec x, \vec y) = 1$ at $\vec x = \vec y$, and zero elsewhere on $H$.
+In particular for a function $f: H\rightarrow F$  the inner product evaluation formula 
 \[
-\left\langle f ,L_H(\:.\:, \vec y)\right\rangle_H := \sum_{x\in H} f(\vec x) \cdot L_H(\vec x, \vec y) = f(\vec y).
+\left\langle f ,L_H(\:.\:, \vec y)\right\rangle_H := \sum_{\vec x\in H} f(\vec x) \cdot L_H(\vec x, \vec y) = f(\vec y).
 \]
-for every  $\vec y\in H$.
+is valid for every $\vec y\in H$.
 This property extends beyond $H$, as the following Lemma shows.
 \begin{lem}
 \label{lem:Lagrange}
@@ -198,52 +250,50 @@ By the property of $L_H(\vec X,\vec z)$, we have $\big\langle L_H(\:.\:, \vec z)
 This completes the proof of the Lemma.
 \end{proof}
 
-We will use the Lagrange kernel to reduce domain equalities over $H$ to sumchecks. 
-This is tantamount to the tensor-query to point-query paradigm from \cite{TensorIOP} used in a line of work, e.g. \cite{TensorCodes, TensorR1CS, TensorRothblum, TensorR1CSarbitraryF}.
 
-\begin{rem}
-\label{rem:Lagrange}
+%This is tantamount to the tensor-query to point-query paradigm from \cite{TensorIOP} used in a line of work, e.g. \cite{TensorCodes, TensorR1CS, TensorRothblum, TensorR1CSarbitraryF}.
 Note that for any $\vec y\in F^n$, the domain evaluation of $L_H(\vec X, \vec y)$ over $H$ can be computed in 
-$\bigO{|H|}$ field operations, by recursively computing the domain evaluation of the partial products $p_k(X_1,\ldots, X_k, y_1,\ldots, y_k)= \frac{1}{2^n}\cdot \prod_{j=1}^k (1 + X_j\cdot y_j)$ over $H_k =\{\pm 1\}^k$ from the domain evaluation of $p_{k-1}$, where one starts with $f_0 = \frac{1}{2^n}$ over the single-point domain $H_0$.
-Each recursion step costs $|H_{k-1}|$ field multiplications $\mathsf M$ and the same number of additions $\mathsf A$,  
-yielding overall
-\begin{equation*}
+$\bigO{|H|}$ field operations, by recursively computing the domain evaluation of the partial products 
+$
+p_k(X_1,\ldots, X_k, y_1,\ldots, y_k)= \frac{1}{2^n}\cdot \prod_{j=1}^k (1 + X_j\cdot y_j)
+$ 
+over $H_k =\{\pm 1\}^k$ from the domain evaluation of $p_{k-1}$, where one starts with $f_0 = \frac{1}{2^n}$ over the single-point domain $H_0$.
+Each recursion step costs $|H_{k-1}|$ field multiplications, denoted by $\mathsf M$, and the same number of additions, denoted by $\mathsf A$,  yielding overall
+\begin{equation}
+\label{e:lagrange:cost}
 \sum_{k=1}^{n} |H_{k-1}| \cdot (\textsf M + \textsf A) < |H| \cdot  (\textsf M + \textsf A).
-\end{equation*}
-As a consequence, Lemma \ref{lem:Lagrange} shows that multilinear polynomials can be evaluated in linear time from their domain evalution over $H$.
-\end{rem}
-
+\end{equation}
 
 
 \subsection{The formal derivate}
 
-Given a univariate polynomial $p(X) =\sum_{k=0}^{d} c_k\cdot X^k$ over a (possibly infinite) field $F$, its \textit{derivative} is defined as 
+Given a univariate polynomial $p(X) =\sum_{k=0}^{d} c_k\cdot X^k$ over a general (possibly infinite) field $F$, its \textit{derivative} is defined as 
 \begin{equation}
 \label{e:DerivativePoly}
 p'(X) := \sum_{k=1}^{d} k \cdot c_k \cdot X^{k-1}.
 \end{equation}
-The derivative is linear, i.e. for every two polynomials $p_1(X), p_1(X)\in F[X]$, and coefficients $\lambda_1,\lambda_2\in F$,
-\begin{equation}
-\label{e:DerivativeLinear}
+As in calculus, the derivative is linear, i.e. for every two polynomials $p_1(X), p_1(X)\in F[X]$, and coefficients $\lambda_1,\lambda_2\in F$,
+\begin{equation*}
+%\label{e:DerivativeLinear}
 (\lambda_1 \cdot p_1(X) + \lambda_2 \cdot p_1(X))' = \lambda_1\cdot p_1'(X) + \lambda_2\cdot p_2'(X)
-\end{equation}
+\end{equation*}
  and we have the product rule
-\begin{equation}
-\label{e:ProductRule}
+\begin{equation*}
+%\label{e:ProductRule}
 (p_1(X)\cdot p_2(X))' = p_1'(X)\cdot p_2(X) + p_1(X)\cdot p_2'(X).
-\end{equation}
+\end{equation*}
 For a function $\frac{p(X)}{q(X)}$ from the rational function field $F(X)$, the derivative is defined as the rational function
 \begin{equation}
 \label{e:DerivativeQuotient}
 \left(\frac{p(X)}{q(X)}\right)' := \frac{p'(X)\cdot q(X) - p(X)\cdot q'(X)}{q(X)^2}.
 \end{equation}
-Note that by the product rule for polynomials, the definition does not depend on the representation of $\frac{p(X)}{q(X)}$.
+By the product rule for polynomials, the definition does not depend on the representation of $\frac{p(X)}{q(X)}$.
 Both linearity as well as the product rule extend to rational functions. 
 %For a proof of these facts, as well as alternative definitions for the formal derivative, we refer to standard literature. 
 
 For any polynomial $p(X)\in F[X]$, if $p'(X)=0$ then $p(X)= g(X^p)$ where $p$ is the characteristic of the field $F$.
 In particular, if $\deg p(X) < p$, then the polynomial must be constant.
-As facts on the kernel of the derivative in $F(X)$ are not as commonly known, we give a proof of the following lemma.
+As the analogous fact for fractions is not as commonly known, we give a proof of the following lemma.
 
 \begin{lem}
 \label{lem:DerivativeFraction}
@@ -289,10 +339,10 @@ Therefore it must hold that  $r(X) = 0$ and the proof of the lemma is complete.
 
 \subsection{The  logarithmic derivative}
 
-We define the \textit{logarithmic derivate} of a polynomial $p(X)$ over a field $F$ as the rational function
-\begin{equation}
+The \textit{logarithmic derivate} of a polynomial $p(X)$ over a (general) field $F$ is the rational function
+\begin{equation*}
 \frac{p'(X)}{p(X)}.
-\end{equation}
+\end{equation*}
 Note that the logarithmic derivative of the product $p_1(X)\cdot p_2(X)$ of two polynomials $p_1(X), p_2(X)$ equals the sum of their logarithmic derivatives, since by the product rule we have 
 \[
 \frac{(p_1(X)\cdot p_2(X))'}{p_1(X)\cdot p_2(X)} = \frac{p_1'(X)\cdot p_2(X) + p_1(X)\cdot p_2'(X)}{p_1(X)\cdot p_2(X)} 
@@ -311,15 +361,14 @@ We state this fact for our use case of product representations.
 \label{lem:LogarithmicDerivative}
 Let $(a_i)_{i=1}^n$ and $(b_i)_{i=1}^n$ be sequences  over a field $F$ with characteristic $p > n$. 
 Then
-\begin{equation}
-\label{e:d}
+$
 \prod_{i=1}^n \left(X + a_i \right) =\prod_{i=1}^n \left(X + b_i \right)
-\end{equation}
+$
 in $F[X]$ if and only if  
-\begin{equation}
-\label{e:LogDerivativeSum}
+\begin{equation*}
+%\label{e:LogDerivativeSum}
 \sum_{i=1}^n \frac{1}{X + a_i} =\sum_{i=1} ^n\frac{1}{X + b_i}
-\end{equation}
+\end{equation*}
 in the rational function field $F(X)$.
 \end{lem}
 
@@ -327,11 +376,10 @@ in the rational function field $F(X)$.
 If  $p_a(X) = \prod_{i=1}^n \left(X + a_i\right)$ and $p_b(X) = \prod_{i=1}^n \left(X + b_i\right)$
 coincide, so do their logarithmic derivatives.
 To show the other direction, assume that 
-\[
-\frac{p_a'(X)}{p_a(X)}  = \frac{p_b'(X)}{p_b(X)}
-\]
-Then $p_a'(X)\cdot p_b(X) - p_a(X)\cdot  p_b'(X) = 0$. 
-By the definition of formal derivatives for rational functions,  
+$
+\frac{p_a'(X)}{p_a(X)}  = \frac{p_b'(X)}{p_b(X)}.
+$
+Then 
 \[
 \left(\frac{p_a(X)}{p_b(X)}\right)'  = \frac{p_a'(X)\cdot p_b(X) - p_a(X)\cdot  p_b'(X)} {p_b^2(X)} = 0.
 \]
@@ -344,13 +392,38 @@ We stress the fact that Lemma \ref{lem:LogarithmicDerivative} also applies to th
 This observation will be useful when generalizing the permutation argument to the case where $a_i$ and $b_i$ are multilinear polynomials in $Y_1, \ldots, Y_n$.
 \end{rem}
 
-Another useful property of the logarithmic derivative of a product $f(X)=\prod_{i=1}^N (X + a_i)$ is that
+Given a product $p(X)=\prod_{i=1}^N (X + a_i)$ we can gather the poles of its logarithmic derivative obtaining the fractional decomposition  
 \begin{align*}
-\frac{f(X)}{f'(X)} = \sum_{a\in A} \frac{m(a)}{X + a},
+\frac{p'(X)}{p(X)} = \sum_{a\in F} \frac{m(a)}{X + a},
 \end{align*}
-where $A$ is the set comprised of all $a_i$, $i=1,\ldots, N$,  and $m(a)\in \{1,\ldots, N\}$ is the multiplicity of each $a\in A$ occoring in $(a_i)_{i=1}^N$.
-This leads to the following algebraic criterion for batch set membership.
-\begin{lem}[Batch set membership]
+where $m(a)\in \{1,\ldots, N\}$ is the multiplicity of the value $a$ in $(a_i)_{i=1}^N$.
+Fractional decompositions are unique, as shown by the following lemma.
+\begin{lem}
+\label{lem:UniqueFractionalRep}
+Let $F$ be an arbitrary field and $m_1, m_2: F\rightarrow F$ any functions.
+Then
+$
+\sum_{z\in F} \frac{m_1(z)}{X - z} = \sum_{z\in F} \frac{m_2(z)}{X - z}
+$
+in the rational function field $F(X)$, if and only if $m_1(z)=m_2(z)$ for every $z\in F$.
+\end{lem}
+\begin{proof}
+Suppose that the fractional decompositions are equal.  
+Then $\sum_{z\in F} \frac{m_1(z)-m_2(z)}{X - z} = 0$, and therefore
+\[
+p(X) = \prod_{w\in F} (X - w)\cdot\sum_{z\in F} \frac{m_1(z)-m_2(z)}{X - z} = \sum_{z\in F} (m_1(z)-m_2(z))\cdot \prod_{w\in F\setminus\{z\}} (X - w) = 0.
+\]
+In particular,
+$
+p(z) = (m_1(z) - m_2(z)) \cdot  \prod_{w\in F\setminus\{z\}} (z - w)= 0
+$
+for every $z\in F$.
+Since   $\prod_{w\in F\setminus\{z\}} (z - w) \neq 0$ we must have $m_1(z)  = m_2(z)$ for every $z\in F$. 
+The other direction is obvious.
+\end{proof}
+
+This leads to the following algebraic criterion for set membership, which is the key tool for our lookup arguments.
+\begin{lem}[Set inclusion]
 \label{lem:batchsetmembership}
 Let $F$ be a field of characteristic $p>N$, and suppose that $(a_i)_{i=1}^N$, $(b_i)_{i=1}^N$ are arbitrary sequences of field elements.
 Then $\{a_i \}\subseteq \{b_i\}$ as sets (with multiples of values removed), if and only if there exists a sequence $(m_i)_{i=1}^N$ of field elements from $F_q\subseteq F$ such that
@@ -359,75 +432,58 @@ Then $\{a_i \}\subseteq \{b_i\}$ as sets (with multiples of values removed), if 
 \sum_{i=1}^N \frac{1}{X + a_i} = \sum_{i=1}^N \frac{m_i}{X + b_i}  
 \end{equation}
 in the function field $F(X)$.
+Moreover, we have equality of the sets $\{a_i\} = \{b_i\}$, if and only if $m_i\neq 0$, for every $i=1,\ldots, N$.
 \end{lem}
 
-The proof of Lemma \ref{lem:batchsetmembership}, which is given below, is an immediate consequence of the uniqueness of fractional representations
-\[
-\sum_{z \in \mathcal Z} \frac{c(z)}{X - z},
-\]
-$\mathcal Z\subseteq F$, as shown by the following auxilary lemma.
-\begin{lem}
-\label{lem:UniqueFractionalRep}
-Let $F$ be an arbitrary field and $\mathcal Z\subseteq F$, and let $m_1, m_2$ be any functions from $\mathcal Z$ into $F$.
-Then
-\begin{equation}
-\label{e:LaurentRepZero}
-\sum_{z\in\mathcal Z} \frac{m_1(z)}{X - z} = \sum_{z\in\mathcal Z} \frac{m_2(z)}{X - z}
-\end{equation}
-in the rational function field $F(X)$, if and only if $m_1(z)=m_2(z)$ for every $z\in \mathcal Z$.
-\end{lem}
-\begin{proof}
-Suppose that \eqref{e:LaurentRepZero} holds.  
-Then $\sum_{z\in\mathcal Z} \frac{m_1(z)-m_2(z)}{X - z} = 0$, and therefore
-\[
-p(X) = \prod_{w\in\mathcal Z} (X - w)\cdot\sum_{z\in\mathcal Z} \frac{m_1(z)-m_2(z)}{X - z} = \sum_{z\in\mathcal Z} (m_1(z)-m_2(z))\cdot \prod_{w\in\mathcal Z\setminus\{z\}} (X - w) = 0.
-\]
-In particular,
-\[
-p(z) = (m_1(z) - m_2(z)) \cdot  \prod_{w\in\mathcal Z\setminus\{z\}} (z - w)= 0
-\]
-for every $z\in\mathcal Z$.
-Since   $\prod_{w\in\mathcal Z\setminus\{z\}} (z - w) \neq 0$ we must have $m_1(z)  = m_2(z)$ for every $z\in\mathcal Z$. 
-The other direction is obvious.
-\end{proof}
-
-
-\begin{proof}[Proof of Lemma \ref{lem:batchsetmembership}]
-Let us denote by $A=\{a_i\}$ the set of all $a_i$ occuring in the sequence $(a_i)_{i=1}^N$, and let us write 
-$m_A(a)$ the multiplicity of $a$.
-Likewise, we do for $B=\{b_i\}$.
-Note that since $N < p$, the multiplicities can be regarded as non-zero elements from $F$.
-
-Suppose that $A\subseteq B$. 
-Set 
-\[
-m_i = 
-\begin{cases}
-\frac{m_A(b_i)}{m_B(b_i)} & \text{if }b_i\in A,
-\\
-0 &\text{otherwise}.
-\end{cases}
-\]
+\begin{proof}%[Proof of Lemma \ref{lem:batchsetmembership}]
+Let us denote by $m_a(z)$ the multiplicity of a field element $z$ in the sequence $(a_i)_{i=1}^N$.
+Likewise, we do for $(b_i)_{i=1}^N$.
+Note that since $N < p$, the multiplicities can be regarded as non-zero elements from $F_p$ as a subset of $F$.
+Suppose that $\{a_i\}\subseteq \{b_i\}$ as sets. 
+Set $(m_i)$ as the normalized multiplicities
+$
+m_i = \frac{m_a(b_i)}{m_b(b_i)}.
+$
 This choice of $(m_i)$ obviously satisfies \eqref{e:fracs}.
 
 Conversely, suppose that \eqref{e:fracs} holds.
 Collecting fractions with the same denominator we obtain fractional representations for both sides of the equation \eqref{e:fracs},  
 \begin{align*}
-f(X) = \sum_{i=1}^N \frac{1}{X + a_i} &= \sum_{z\in A\cup B} \frac{m_f(z)}{X + z},
+\sum_{i=1}^N \frac{1}{X + a_i} &= \sum_{z\in F} \frac{m_a(z)}{X + z},
 \\
-g(X) = \sum_{i=1}^N \frac{m_i}{X + b_i} & = \sum_{z\in A\cup B} \frac{m_g(z)}{X + z}.
+\sum_{i=1}^N \frac{m_i}{X + b_i} & = \sum_{z\in F} \frac{\mu (z)}{X + z}.
 \end{align*}
-Note that since $N < p$, we know that for each $z\in A$ we have $m_f(z)\neq 0$. 
-By the uniqueness of fractional representations,  Lemma \ref{lem:UniqueFractionalRep}, $m_g(z) = m_f(z)$ for every $z\in A$, and therefore each $z\in A$ must occur also in $B$. 
+Note that since $N < p$, we know that for each $z\in \{a_i\}$ we have $m_a(z)\neq 0$. 
+By the uniqueness of fractional representations,  Lemma \ref{lem:UniqueFractionalRep}, $m_a(z) = \mu(z)$ for every $z\in \{a_i\}$, and therefore each $z\in \{a_i\}$ must occur also in $\{b_i\}$. 
 \end{proof}
 
 
-\subsection{Lagrange interactive oracle proofs (TODO)}
+
+\subsection{Lagrange interactive oracle proofs}
+
+The oracle proofs of many general purpose SNARKs such as Plonk \cite{Plonk} or algebraic intermediate representations \cite{Starks} rely on witnesses that are given in Lagrange representation, i.e. by their values over a domain $H$.
+Their multivariate variants may completely avoid the usage of fast Fourier transforms whenever the polynomial commitment scheme can be turned into one that does not need to know the coefficients, neither when computing a commitment nor in an opening proof.
+Exactly this property is captured by \textit{Lagrange oracle proofs}, rather than polynomial ones \cite{Dark}.
+
+A \textit{Lagrange interactive oracle proof} (\textit{Lagrange IOP}) over the boolean hypercube $H=\{\pm 1\}^n$ is an interactive protocol between two parties, the ``prover'' and the ``verifier''.
+In each round, the verifier sends a message (typically a random challenge) and the prover computes one or several functions over the boolean hypercube, and gives the verifier oracle access to them.
+From the moment on it is given access, the verifier is allowed to query the oracles for their inner products with the Lagrange kernel $L_H(\:.\:, \vec y)$, associated with an arbitrary vector $\vec y\in F^n$. 
+
+The security notions for Lagrange IOPs, such as completeness, (knowledge) soundness, and zero-knowledge, are exactly the same as for other interactive oracle proofs.
+We assume that the reader is familiear with these, and refer to \cite{IOPs} or \cite{Dark} for their formal definitions.
+
+Lagrange IOPs are turned into arguments by instantiating the Lagrange oracles by a  \textit{Lagrange commitment scheme}.
+A Lagrange commitment scheme is a commitment scheme for functions over $H$ that comes with an evaluation proof for Lagrange queries.
+For example, inner product arguments \cite{BootleGroth} can be directly used to construct Lagrange commitment schemes,
+% (see Appendix \ref{s:appendix: IPA}), 
+but also the multilinear variant \cite{MVKZG} of the \cite{Kate} commitment scheme is easily modified to completely avoid dealing with coefficients. 
+We suppose that this is well-known, and therefore we omit an explicit elaboration in this paper.
+
 
 \subsection{The sumcheck protocol}
 
-For the sake of completeness we give a concise summary on the sumcheck protocol \cite{sumcheck} for multivariate polynomials.
-Given a multivariate polynomial $p(X_1,\ldots, X_n)\in F[X_1,\ldots, X_n]$, a prover wants to convince the verifier upon that
+We give a concise summary on the sumcheck protocol \cite{sumcheck} for multivariate polynomials.
+Given a multivariate polynomial $p(X_1,\ldots, X_n)\in F[X_1,\ldots, X_n]$, a prover wants to convince a verifier upon that
 \begin{equation*}
 s = \sum_{(x_1,\ldots, x_n) \in \{\pm 1\}^n} p(x_1, \ldots, x_n).
 \end{equation*}
@@ -518,8 +574,7 @@ The sumcheck protocol (Protocol \ref{p:Sumcheck}) has soundness error
 \varepsilon_{sumcheck} \leq \frac{1}{|F|}\cdot \sum_{i=1}^n \deg_{X_i} p(X_1,\ldots, X_n).
 \end{equation}
 \end{thm}
-\begin{rem}
-\label{rem:BatchedSumcheck}
+
 The sumcheck protocol is easily extended to the sumcheck for a batch of polynomials $p_i(X_1,\ldots, X_n)$, $i=0, \ldots, L$, by letting the verifier sample a random vector $(\lambda_1,\ldots, \lambda_L)\sample F^L$, and a subsequent sumcheck protocol for the random linear combination
 \[
 \bar p (X_1, \ldots, X_n) = p_0(X_1,\ldots, X_n) + \sum_{i=1}^{L} \lambda_i \cdot p_i(X_1,\ldots, X_n).
@@ -529,12 +584,11 @@ The soundness error bound increases only slightly,
 \label{e:BatchSumcheckSoundness}
 \varepsilon_{sumcheck} \leq \frac{1}{|F|}\cdot \left(1 + \sum_{i=1}^n \deg_{X_i} p(X_1,\ldots, X_n)\right).
 \end{equation}
-\end{rem}
 
 %\begin{rem}
 \subsubsection*{Computational cost}
 
-Let us discuss the prover cost of Protocol \ref{p:Sumcheck} for the case that  $p(\vec X) = p(X_1,\ldots, X_n)$ is of the form
+Let us discuss the prover cost of the sumcheck protocol for the case that  $p(\vec X) = p(X_1,\ldots, X_n)$ is of the form
 \[
 p(\vec X) = Q(w_1(\vec X), \ldots, w_m(\vec X)),
 \]
@@ -577,17 +631,7 @@ m\cdot |H_i|\cdot \textsf S + m \cdot (|D| - 1)\cdot |H_{i}| \cdot (\textsf M + 
 %< |D|  \cdot |H_{i}| \cdot \big((m + |Q|_M)\cdot\textsf M +  (m+ |Q|_\textsf S) \cdot\textsf S + (m + |Q|_\textsf A + 1)\cdot \textsf A\big).
 \end{align*}
 where the last term is for the domain sums.
-Since $\sum_{i=1}^{n} |H_{i}| < |H_0| = |H|$, the overall cost for the prover is bounded by 
-\begin{equation}
-\label{e:SumcheckCost}
-|H|\cdot (d + 1) \cdot \big( (m + |Q|_\textsf M)\cdot\textsf M +
-(m + |Q|_\textsf S)\cdot\textsf S +
-(m + |Q|_\textsf A + 1)\cdot\textsf A
-\big),
-\end{equation}
-where $d$ is the absolute degree of $Q$.
-This is an $\bigO{|H|}$ of field operations.
-When making detailed comparisons, we will use the precise formula
+Since $\sum_{i=1}^{n} |H_{i}| = |H| - 1$, the overall cost for the prover is bounded by 
 \begin{equation}
 \label{e:sumcheck:cost:precise}
 |H|\cdot \left(1-\frac{1}{|H|}\right)\cdot \big( (d\cdot m + (d+1)\cdot |Q|_\textsf M)\cdot\textsf M +
@@ -595,6 +639,10 @@ When making detailed comparisons, we will use the precise formula
 (d\cdot m + (d+1)\cdot (|Q|_\textsf A + 1))\cdot\textsf A
 \big).
 \end{equation}
+We shall use this formula for the operation counts of our lookup protocol.
+
+
+
 
 
 
@@ -620,10 +668,10 @@ The plot for proving that $\bigcup_{i=1}^M \{f_i(\vec x)\}_{\vec x\in H}\subsete
 Given a random challenge $x\sample F$, the prover shows that the rational identity \eqref{e:lookup:fractional:identity} holds at $X= x$, whenever evaluation is possible. 
 However, in order to make \eqref{e:lookup:fractional:identity} applicable to the sumcheck argument, the prover needs to provide multilinear helper functions for the rational expressions. 
 We shall discuss two different different approaches to do that.
-In  the first one, explained in Section \ref{s:lookup:small}, we use a single helper function for the entire fractional expression in \eqref{e:lookup:fractional:identity}, which is subject to a domain identity over $H$ which has $\bigO{M}$ variables and absolute degree $\bigO{M}$.
+In  the first one, explained in Section \ref{s:lookup:small}, we use a single multilinear function for the entire fractional expression in \eqref{e:lookup:fractional:identity}, which is subject to a domain identity over $H$ which has $\bigO{M}$ variables and absolute degree $\bigO{M}$.
 This will lead to a protocol with a $\bigO{M^2}$ prover. 
 However, if $M$ is not too large this approach will be more performant than the second one, discussed in Section \ref{s:lookup:large}, in which we essentially use helper functions for each of the reciprocals $\frac{1}{x + f_i(\vec x)}$, and $\frac{1}{x + t(\vec x)}$. 
-This yields a sumcheck polynomial in $\bigO{M}$ many variables, but the absolute degree is bounded, henceforth having a $\bigO M$ prover.
+This second variant has a sumcheck polynomial in $\bigO{M}$ many variables, but the absolute degree is bounded, henceforth having a $\bigO M$ prover.
 
 
 \subsection{An argument for not too many columns}
@@ -635,7 +683,7 @@ In this variant we provide a single helper function
 h(\vec x) = \sum_{i=1}^M \frac{1}{x + f_i(\vec x)} - \frac{m(\vec x)}{x + t(\vec x)},
 \end{equation}
 subject $\sum_{\vec x\in H} h(\vec x) = 0$.
-Correctness of $h$ is enforced by the domain identity
+Correctness of $h$ is ensured by the domain identity
 \begin{equation}
 \label{e:lookup:h:identity}
 \big(h(\vec x) \cdot  (x + t(\vec x)) + m(\vec x)\big) \cdot \prod_{i=1}^M (x + f_i(\vec x)) = (x + t(\vec x))\cdot \sum_{i=1}^M \prod_{j\neq i} (x + f_j(\vec x))
@@ -643,7 +691,7 @@ Correctness of $h$ is enforced by the domain identity
 over $H$, and we apply the Lagrange kernel $L_H(\:.\:, \vec z)$ at a randomly chosen $\vec z\sample F^n$ to reduce the domain identity to another sumcheck over $H$. 
 Both sumchecks, the one for $h$ and the one for the domain identity, are then combined into a single one, using another randomness $\lambda\sample F$.
 
-\begin{protocol}[Multi-column Lookup over $H=\{\pm 1\}^n$]
+\begin{protocol}[Multi-column lookup over $H=\{\pm 1\}^n$]
 \label{prot:lookup}
 Let $M\geq 1$ be an integer, and $F$ a finite field with characteristic $p > M\cdot 2^n$. 
 Given any functions $f_1, \ldots, f_M, t :H\rightarrow F$ on the boolean hypercube $H=\{\pm 1\}^n$, the Lagrange IOP for that $\bigcup_{i=1}^M\{f_i(\vec x) : \vec x\in H\}\subseteq \{t(\vec x) : \vec x\in H\}$ as sets is as follows.
@@ -869,7 +917,7 @@ With these reciprocals we obtain the values for
 h = \sum_{i=1}^M \frac{1}{\varphi_i} - \frac{m}{\tau} 
 \]
 by $|H|\cdot (1\cdot \mathsf S +(M-1)\cdot\mathsf A)$. 
-By Remark \ref{rem:Lagrange}, the values for $L_H(\vec X, \vec y)$ over $H$ are obtained within $|H|\cdot (\mathsf M + \mathsf A)$ operations. 
+By the remark following Lemma \ref{lem:Lagrange}, the values for $L_H(\vec X, \vec y)$ over $H$ are obtained within $|H|\cdot (\mathsf M + \mathsf A)$ operations. 
 Hence the total cost of the preparation phase is
 \[
 |H|\cdot ((3\cdot M + 4)\cdot\mathsf M + 1\cdot\mathsf S + (2\cdot M + 1) \cdot\mathsf A.
@@ -909,25 +957,25 @@ M\cdot |H|\cdot (44\cdot\mathsf M + 10\cdot\mathsf S + 37\cdot\mathsf A),
 but the prover needs to provide the oracles for one function over  a domain of size $M\cdot|H|$, and one over $H$. 
 
 
-Let us estimate the range for $M$ where Protocol \ref{prot:lookup} is more efficient than the $\bigO M$ variant.
-For this we use a heuristic for the cost of computing commitments by a multi-scalar multiplication in an elliptic curve over $256$ bit large field.
-According to \cite{ECscalarMul} a lower bound for the cost of a single scalar multiplication is about $8\cdot 256 = 2040$ field multiplications. 
-For the multi-scalar multiplication of size $|H|$ using the Pippenger algorithm, we take the cost of $|H|$ scalar multiplications corrected by a factor of $\frac{1}{\log|H|}$, which yields about 
-\[
-\frac{|H|}{\log|H|}\cdot 2040 \cdot\mathsf M 
-\]
-field multiplications for a single commitment.
-Using this estimate the number of multiplications for the $\bigO{M}$-strategy is 
-\begin{equation}
-\label{lookup:cost:Mcolumn:naive}
-|H|\cdot (43\cdot M + \frac{2040}{\log|H|}\cdot (M+1)) \cdot\mathsf M,
-\end{equation}
-wheras for the multi-column lookup it is
-\begin{equation}
-\label{lookup:cost:Mcolumn:batch}
-|H| \cdot  \big((5\cdot M^2 + 19 \cdot M + 18 + \frac{4080}{\log|H|}) \cdot\textsf M.
-\end{equation}
-Comparing \eqref{lookup:cost:Mcolumn:naive} and \eqref{lookup:cost:Mcolumn:batch} at $|H|=2^{12}$ yields an expected maximum speedup by a factor of $2.15$ for $M=8$, more than $50\%$ faster for $3\leq M\leq 21$, and a break-even point at about $M = 36$ columns.
+Let us estimate the range for $M$ where Protocol \ref{prot:lookup} is more efficient than the $\bigO M$ variant. 
+For this we use the benchmarks from Table \ref{tab:pippenger} which measure the equivalent number of field multiplication for a multi-scalar multiplication in an elliptic curve over $256$ bit large field.
+Based on this equivalent, and our operation counts for the oracle prover, we obtain the following break even points.
+\begin{table}[h!]
+\caption{%
+The estimated number of columns $M$ where the $\bigO{M}$ strategy starts to perform better than Protocol \ref{prot:lookup}. 
+The numbers are based on the operation counts \eqref{e:lookup:cost} and \eqref{e:lookup:large:cost} for the oracle prover, and the 
+benchmarks for a multi-scalar multiplication over the Pallas curve, see Table \ref{tab:pippenger}.
+}
+\vspace*{0.5cm}
+\centering
+\begin{tabular} {|c|c|c|c|c|}
+\hline
+$\log|H|$ & 12 & 14 & 16 & 18
+\\\hline
+$M$ & 114 & 95 & 81 & 73
+\\\hline
+\end{tabular}
+\end{table}
 
 
 
@@ -965,6 +1013,7 @@ Comparing \eqref{lookup:cost:Mcolumn:naive} and \eqref{lookup:cost:Mcolumn:batch
 %Thus it is safe to assume that Protocol \ref{prot:pa} is throughout faster than the univariate case, and we expected it to be more than three times as performant at $\log|H| \approx 12$.
 
 \section{Lookups based on the Hyperplonk shift}
+\label{s:hyperplonk}
 
 In this section we informally discuss multi-column lookups using the time shift from Hyperplonk+ \cite{Hyperplonk}. 
 We  give detailed operation counts and compare with our lookup arguments from Section \ref{s:lookups}.
@@ -982,7 +1031,7 @@ f(T(x_1, \ldots, x_n)) =  \frac{1 + x_n}{2} \cdot f(1, x_1,\ldots, x_{n-1}) + \f
 
 %Although the Hyperplonk lookup uses the , 
 Using the time shift $T$ allows for the same strategy as in the well-known univariate case \cite{Plookup}, which for the sake of completness recap in Appendix \ref{s:uv:lookup}.
-In short, the argument is based on the fact that, given two sequences of field elements $(a_i)_{i=0}^{N-1}$ and $(t_i)_{i=0}^{N-1}$, then $\{a_i : j= 0,\ldots, N-1\}\subseteq \{t_i : i = 0, \ldots, N-1\}$ as sets, if and only if there exists a sequence $(s_i)_{i=0}^{2N-1}$ of double the size, which satisfies the identity
+In short, the argument is based on the fact that, given two sequences of field elements $(a_i)_{i=0}^{N-1}$ and $(t_i)_{i=0}^{N-1}$, then $\{a_i : j= 0,\ldots, N-1\}\subseteq \{t_i : i = 0, \ldots, N-1\}$ as sets, if and only if there exists a sequence $(s_i)_{i=0}^{2N-1}$ of double the size, which satisfies the lookup identity
 \begin{equation}
 \label{e:lookup:Gabizon}
 \prod_{i=0}^{N-1} (X + s_{i}+ s_{i+1\bmod N}\cdot Y)
@@ -999,12 +1048,13 @@ The second one proves the grand product argument over an extended hypercube $\ba
  
 %In terms of performance both are equivalent.)
 
-\subsection{Batched grand product for not too many columns}
+\subsection{The argument for not too many columns}
+\label{s:hyperplonk:small}
 
 Let $t: H'\rightarrow F$ be the lookup table, and $f_i:  H'\rightarrow F$, $i=1,\ldots,M$, the functions subject to the lookup.
 Although the functions are defined over the punctuated hypercube $H'$, we assume arbitrary values at $\vec 1$.
 (These will be ignored by the lookup argument.)
-The prover provides the ordered merge of the $f_i$  together with $t$ via additional functions $s_i: H'\rightarrow F$, $i=1,\ldots, M+1$, subject to the Gabizon identity
+The prover provides the ordered merge of the $f_i$  together with $t$ via additional functions $s_i: H'\rightarrow F$, $i=1,\ldots, M+1$, subject to the lookup identity
 \begin{multline*}
 \prod_{\vec x\in H'} \prod_{i=1}^{M} (X + s_{i}(\vec x) + s_{i+1}(\vec x)\cdot Y)\cdot (X + s_{M+1}(\vec x) + s_1(T(\vec x))\cdot Y)
 \\
@@ -1040,18 +1090,15 @@ Correctness of the grand product is proven by the constraint on its initial valu
 - \phi(\vec x)\cdot \sigma_{M+1}(\vec x)\cdot \prod_{i=1}^M \sigma_{i}(\vec x)
 = 0, 
 \end{equation}
-for all $\vec x \in H$, where for $i=1,\ldots, M$,
+for all $\vec x \in H$, where for $i=1,\ldots, M$, we use the notation
 \begin{align*}
 \varphi_{i} (\vec x) &=\alpha +  (1+\beta)\cdot f_i(\vec x),
 \\
 \sigma_{i}(\vec x) &= \alpha + s_i(\vec x) + \beta\cdot s_{i+1}(\vec x), 
 \end{align*}
 and
-\begin{align*}
-\sigma_{M+1}(\vec x) &=  \alpha + s_{M+1}(\vec x) + \beta\cdot s_1(T( \vec x)),
-\\
-\tau(\vec x) &= \alpha + t(\vec x) + \beta\cdot t(T( \vec x)).
-\end{align*}
+$\sigma_{M+1}(\vec x) =  \alpha + s_{M+1}(\vec x) + \beta\cdot s_1(T( \vec x))$,
+$\tau(\vec x) = \alpha + t(\vec x) + \beta\cdot t(T( \vec x))$.
 As in Protocol \ref{prot:lookup}, both constraints on $\phi$ are reduced to sumchecks over $H$ by help of the Lagrange polynomials $L_H(\:.\:, \vec y)$, $\vec y\sample F^n$, and $L_H(\:.\:, -\vec 1)$, and combined into a single one by a batching randomness $\lambda\sample F$.
 The resulting overall sumcheck is
 \[
@@ -1065,9 +1112,13 @@ Q(L_H, L,   \tau, \varphi_1,\ldots, \varphi_M, \sigma_1,\ldots, \sigma_{M+1}, \p
 - \phi \cdot \prod_{i=1}^{M+1} \sigma_i \Big)
 + \lambda\cdot L \cdot (\phi - 1). 
 \end{equation}
-
-Notice that $Q$ has  absolute degree $d = M+3$, which is the same as in Protocol \ref{prot:lookup}, but  about the double of variables, $\nu= 2\cdot M+ 6$.
+Note that $Q$ has  absolute degree $d = M+3$, which is the same as in Protocol \ref{prot:lookup}, but  about the double of variables, $\nu= 2\cdot M+ 6$.
 Its arithmetic complexities are $|Q_\mathsf M|= 2\cdot(M+1) + 3$, $|Q_\mathsf S|= 2$, $|Q_\mathsf A|= 1$. 
+
+
+
+\subsubsection*{Prover costs}
+
 The prover cost are as follows.
 Computing the values for $\tau$ and all $\varphi_i,  \sigma_i$ over $H$ consumes overall
 \[
@@ -1080,13 +1131,14 @@ The domain evaluation for $L_H(\vec X, \vec y)$ is obtained within $|H|\cdot (\m
 \end{equation*}
 Neglecting the $\nicefrac{1}{|H|}$-term, the overall cost of the prover is 
 \begin{equation}
-\label{e:lookup:hyperplonk:cost}
+\label{e:hyperplonk:cost}
 |H| \cdot  \big((4\cdot M^2 + 27\cdot M + 40)\cdot \mathsf M +  (6\cdot M + 20)\cdot\textsf S + (2\cdot M^2 + 17\cdot M + 30) \cdot \textsf A\big).
 \end{equation}
 This is comparable with \eqref{e:lookup:cost}, but does not take into account that the prover needs to supply a total of $M+1$ functions over $H$ instead of two. 
-Using the same heuristics for the cost of a multi-scalar multiplication as in Section \ref{s:lookup:cost}, again for $n=12$ we expect Protocol \ref{prot:lookup} more than $75\%$ faster at almost the entire range $3\leq M \leq 28$, achieving a maximum speedup of about $130\%$ at $M=9$ columns.
 
-\subsection{Large number of columns}
+
+\subsection{A variant for a large number of columns}
+\label{s:hyperplonk:large}
 
 Suppose that we have a table function $t:H'\rightarrow F$ defined over the punctuated hypercube $H' = H\setminus\{\vec 1\}$, and $M$ column functions $f_1,\ldots, f_M: H\rightarrow F$ defined on the \textit{entire} hypercube.
 %Again, $t$ takes an arbitrary value at $\vec 1$, which is ignored by the lookup 
@@ -1136,9 +1188,13 @@ where
 Q(L_H, L, \varphi, \sigma,\phi, \phi_T) = 
 L_H\cdot (\phi_T\cdot \varphi - \phi\cdot \sigma) + \lambda\cdot L\cdot (\phi - 1).
 \end{equation}
-
 The polynomial $Q$ has $\nu=6$ variables, absolute degree $d=3$, and its arithmetic complexities are $|Q_\mathsf M|= 5$, $|Q_\mathsf S| = 2$, $|Q_\mathsf A|= 1$.
-This leads to the following prover cost.
+
+
+
+
+\subsubsection*{Prover cost}
+
 Computing the values of the patched function $\varphi$  over $\bar H$ takes 
 \[
 |\bar H |\cdot (1\cdot \mathsf M + 2\cdot \mathsf A),
@@ -1153,18 +1209,87 @@ Last but not least, computing $L_{\bar H}(\:.\:, \vec z)$ over $\bar H$ costs $|
 \[
 |\bar H| \cdot \left(1 + \frac{1}{|\bar H|}\right) \cdot (38 \cdot \mathsf M + 20 \cdot \mathsf S + 26\cdot\mathsf A).
 \] 
-Neglecting the $\frac{1}{|H|}$-term, the overall cost of the prover is
+Neglecting the $\frac{1}{|\bar H|}$-term, the overall cost of the prover is
 \begin{equation}
+\label{e:hyperplonk:large:cost}
 (M+1)\cdot |H| \cdot (45 \cdot \mathsf M + 20 \cdot \mathsf S + 30\cdot\mathsf A),
 \end{equation}
 whereas it needs to provide the functions $s$ and $\phi$ over $\bar H$, which amounts the equivalent of $2\cdot (M+1)$ functions over $|H|$.
-%As the grand product extends over the entire hypercube $\bar H$, the grand product argument from Setty and Lee \cite{Quarks} is m
 
+Based on our benchmark-backed equivalent number of field operations for a multi-scalar multiplications (Table \ref{tab:pippenger}), we obtain the following break even points.
+\begin{table}[h!]
+\caption{%
+The estimated number of columns $M$ where the $\bigO{M}$ strategy starts to perform better than the protocol from Section \ref{s:hyperplonk:small}. 
+The numbers are based on the operation counts \eqref{e:hyperplonk:cost} and \eqref{e:hyperplonk:large:cost} for the oracle prover, and the benchmarks for a multi-scalar multiplication over the Pallas curve, see Section \ref{s:appendix:benches}.
+}
+\vspace*{0.5cm}
+\centering
+\begin{tabular} {|c|c|c|c|c|}
+\hline
+$\log|H|$ & 12 & 14 & 16 & 18
+\\\hline
+$M$ & 143 & 120 & 103 & 92
+\\\hline
+\end{tabular}
+\end{table}
 
+\subsection{Comparison with logarithmic derivative lookups}
 
-\subsection{Comparison with logarithmic derivative lookups (TODO)}
+The main advantage of logarithmic derivative lookups over the ones from the current section is not the arithmetic cost  as reflected by the operation counts  \eqref{e:lookup:cost}, \eqref{e:lookup:large:cost} and \eqref{e:lookup:cost}, \eqref{e:lookup:large:cost}, but the number and sizes of oracle functions the prover needs to provide.
+That oracle costs depend on the used commitment scheme.
+To give an estimate for these costs in the case of an elliptic curve based Lagrange commitment scheme (such as the IPA), we 
+rely on a benchmark-backed equivalent of field multiplications for the multi-scalar multiplication in the Pallas curve.
+These are as follows.
 
+\begin{table}[h!]
+\caption{%
+Benchmark of Halo2's Pippenger multi-scalar multiplication in the Pallas curve, varying the number $N$ of scalars.
+The benchmarks where done on a AMD Ryzen 7 PRO 4750U, 32GB RAM DDR4,  restricting to a single core.
+}
+\label{tab:pippenger}
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+$\log N$ &  Pippenger of size $N$ & $2^8\cdot N$ field mult. & equivalent field mult.
+\\\hline
+12 & $46.010$ ms &  $21.11$ ms & $N\cdot 557\cdot \mathsf M$
+\\
+14 & $153.67$ ms & $42.315$ ms & $N\cdot 464 \cdot \mathsf M$
+\\
+16 & $522.13$ ms & $169.70$ ms & $N\cdot 394\cdot\mathsf M$
+\\
+18 &       $1.869$  ms  & $679.27$ ms & $N\cdot 351\cdot\mathsf M$
+\\\hline
+\end{tabular}
+\end{center}
+\end{table}
 
+With these equivalence measure and the operation counts from  \eqref{e:lookup:cost}, \eqref{e:lookup:large:cost} and \eqref{e:hyperplonk:cost}, \eqref{e:hyperplonk:large:cost}, we obtain the following ratios of field multiplications.
+
+\begin{table}[h!]
+\caption{%
+The estimated performance advantage of the logarithmic derivative lookups over the ones from this section, as the ratio of their number of field multiplications $r =\nicefrac{\mathsf M({Plookup})}{\mathsf M({logD})}$.
+The numbers are based on the equivalent number of field multiplication from Table \ref{tab:pippenger}.
+For hypercube sizes $|H|$ ranging from $2^{12}$--$2^{18}$ we describe the maximum ratio $r_{max}$ over the number of columns $M$, as well as the ranges for $M$ over which $r$ is larger than $2$ and $3$, respectively.
+The minimum ratio is throughout $r= 1.5$ and obtained in the single-column setting $M=1$. 
+}
+\label{tab:comparison}
+\vspace*{0.5cm}
+\centering
+\begin{tabular} {|c|c|c|c|c|}
+\hline
+$\log|H|$ & $r\geq 3$ & $r\geq 2$ & $r_{max}$ 
+\\\hline
+12 & $M\in [5, 41]$ & $M\in [3, 87]$ & $4.1$ (at $M =15$)
+\\
+14 & $M\in [6, 32]$ & $M\in [3, 71]$ & $3.8$ (at $M= 13$)
+\\
+16 & $M\in [6, 26]$  & $M\in [3, 59]$ & $3.5$ (at $M= 12$)
+\\
+18 & $M\in [6, 21]$  & $M\in [3, 52]$ & $3.2$ (at $M= 12$)
+\\\hline
+\end{tabular}
+\end{table}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -1174,7 +1299,8 @@ whereas it needs to provide the functions $s$ and $\phi$ over $\bar H$, which am
 \appendix
 %\newpage
 \section{Appendix}
-\label{s:Appendix}
+\label{s:appendix}
+
 
 \subsection{Univariate Lookups}
 \label{s:uv:lookup}
@@ -1307,98 +1433,9 @@ where $v_H(X)$ is the vanishing polynomial of $H$.
 % where at least one has to impose the Boolean constraint on $s_f(x)$ and $s_t(x)$, i.e. $s_f(x)\cdot (1 - s_f(x)) = 0$, $s_t(x)\cdot (1 - s_t(x)) = 0$.
 % But even then, one might set the selector for $f$ in such a way that it mutes values $f(x)$ which are not contained in the range of $g$.
 
-\subsection{IPA for Lagrange-queries (TODO)}
-
-\begin{itemize}
-\item
-Commitment of Lagrange representation, i.e. the values of a function $f: H\rightarrow F$.
-\item
-The inner product argument for $\langle f, L_H(\:.\:, \vec z)\rangle$ is as usual, but uses the decomposition into $f(+1, X_2,\ldots, X_n)$ and $f(-1, X_2,\ldots, X_n)$ instead.
-Start with $f_0 = f$ over $H_0 = H = \{\pm 1\}^n$, and compute
-\[
-f_{i+1}(X_{i+1},\ldots, X_n) = \frac{1-\lambda_{i+1}}{2}\cdot f_i(+1, X_{i+1},\ldots, X_n) + \frac{1+\lambda_{i+1}}{2}\cdot f(+1, X_{i+1},\ldots, X_n), 
-\] 
-where $\lambda_{i}$ is the randomness of the reduction step.
-(The correction factors are...)
-Lagrange functions $L_i(\pm1\|\vec x, \vec z)$ for $H_i = \{\pm 1\}^{n-i}$ fold into 
-\begin{multline*}
-\frac{1 + \lambda_{i+1}}{2}\cdot L_{i}(+ 1\|\vec x, \vec z) + \frac{1 - \lambda_{i+1}}{2}\cdot  L_{i}(-1\|\vec x, \vec z) =
-\\
-= \frac{1 + \lambda_{i+1}}{2} \cdot \frac{1 + z_i}{2}\cdot L_{i+1}(\vec x, \vec z) + \frac{1 - \lambda_{i+1}}{2}\cdot \frac{1-z_i}{2}\cdot L_{i+1}(\vec x, \vec z)
-= \frac{1 + \lambda_{i+1}\cdot z_i}{2}\cdot L_{i+1}(\vec x, \vec z).
-\end{multline*}
-
-\item
-The reduction polynomial is
-\[
-\prod_{i=1}^{n} \frac{1 + \lambda_i\cdot z_i}{2} = L_n(\vec \lambda, \vec z), 
-\]
-which is succinct and therefore allows to adapt the Halo public aggregation scheme.
-\end{itemize}
-
-\subsection{KZG as Lagrange commitment scheme (TODO)}
-
-\begin{itemize}
-\item 
-The KZG for multivariate polynomials can be turned into one for Lagrange queries, 
-using the commitments of $L_H(\vec X, y)$, $y\in H$, as modified base points. 
-By linearity of the scheme, 
-\[
-\comm(f(\vec X))  =  \comm(\sum_{\vec y\in H} f(\vec y)\cdot L_H(\vec X, \vec y)) = \sum_{\vec y\in H} f(\vec y) \cdot \comm(L_H(\vec X, \vec y)),
-\]
-without the need to compute the coefficients of $f(X)$. 
-
-\item
-The opening proof uses the multivariate ideal representation
-\[
-f(X_1,\ldots, X_n)  = v + q_1(\vec X)\cdot (X_1 - z_1) + q_n(\vec X) \cdot (X_n - z_n),
-\]
-which is obtained recursively by starting with $f_1(\vec X) = f(\vec X)$, and computing 
-\[
-f_i(X_i, X_{i+1}, \ldots, X_n) = q_{i+1}(X_{i+1},\ldots, X_n)\cdot (X_i - z_i) + f_{i+1}(X_{i+1}, \ldots, X_n),
-\]
-for $i=1, \ldots, n$, via the evaluation reduction for $X_i = z_i$, i.e.
-\begin{multline*}
-f_i (X_i, \ldots, X_n) = \frac{1 + X_i}{2} \cdot f_i(+1, X_{i+1}, \ldots, X_n) + \frac{1 - X_i}{2} \cdot f_i(-1, X_{i+1}, \ldots, X_n)
-\\
-=  \frac{1 + X_i - z_i + z_i}{2} \cdot f_i(+1, X_{i+1}, \ldots, X_n) + \frac{1 - X_i + z_i - z_i}{2} \cdot f_i(-1, X_{i+1}, \ldots, X_n).
-\end{multline*}
-(In the last step $i=n$, $q_{n+1}$ and $f_{n+1}$ are constants. In particular $f_{n+1} = v$.)
-which leads to 
-\begin{align*}
-q_{i+1}(X_{i+1}, \ldots, X_n) &= f_{i, -} (X_{i+1}, \ldots, X_n)
-\\
-f_{i+1}(X_{i+1},\ldots, X_n) &
-%= \frac{1+ z_i}{2} \cdot f_i(+1, X_{i+1}, \ldots, X_n) - \frac{1- z_i}{2}\cdot f_i(-1, X_{i+1}, \ldots, X_n) 
-= f_i^-(X_{i+1}, \ldots, X_n) + z_i \cdot f_i^+(X_{i+1}, \ldots, X_n),
-\end{align*}
-where
-\begin{align*}
- f_{i}^+ (X_{i+1}, \ldots, X_n) &= \frac{f_i(+1, X_{i+1}, \ldots, X_n) + f_i(-1, X_{i+1}, \ldots, X_n)}{2}, 
-\\
- f_{i}^- (X_{i+1}, \ldots, X_n) &= \frac{f_i(+1, X_{i+1}, \ldots, X_n) - f_i(-1, X_{i+1}, \ldots, X_n)}{2}. 
-\end{align*}
-From these formulas we see that the values of $f_i^+, f_i^-, q_{i+1}, f_{i+1} : H_{i+1}\rightarrow F$ are obtained from the values of $f_i: H_i\rightarrow F$ within at most $6\cdot |H_{i+1}|$ field operations.
-These domain evaluations can be used to determine their commitments in $|H_{i+1}|$ group operations, given the commitments of the Lagrange polynomials $L_{i+1}(\vec X, \vec y)$, $\vec y\in H_{i+1}$. 
-They can be obtained from the ones of $L_i(\vec X, \vec y)$, $\vec y \in H_i$ within $|H_{i+1}|$ group operations, using
-\begin{multline*}
-L_{i+1} (X_{i+1},\ldots, X_n, y_{i+1}, \ldots, y_n)
-\\
-= L_{i}(X_i ,X_{i+1},\ldots, X_n, +1,  y_{i+1}, \ldots, y_n) + L_{i}(X_i, X_{i+1},\ldots, X_n,  -1,  y_{i+1}, \ldots, y_n).
-\end{multline*}
-Overall, reduction step $i$ can be performed within $6\cdot |H_{i+1}|$ field operations and $2\cdot |H_{i+1}|$ group operations.
-Since $\sum_{i=1}^{n-1} |H_{i+1}| \leq |H|$ the total number of field and group operations are linear in $|H|$.
 
 
-\item
-While the Lagrange KZG scheme is linear-time, the proof size and verifier cost are $O(\log|H|)$.
-It seems intriguing to leverage the generic transformation for tensor and polynomial commitment schemes \cite{Gemini, Hyperplonk}  to turn the univariate KZG into a multivariate Lagrange commmitment scheme.
-The odd-even decomposition of their univariate representation corresponds exactly to the decomposition of $f_i$ into $f_i^+$ and $f_i^-$, so their commitments can be computed from the values over $H_{i+1}$ without computing the coefficients.
-Although the transformation can be performed within $O(|H|)$ field and group operations, the final batched opening proof lacks of a possibility to compute the univariate quotient 
-\[
-h(x) = \frac{f(x) - v}{ x - z}
-\]
-in linear time.
-\end{itemize}
+
+
 
 \end{document}
