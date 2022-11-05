@@ -1,4 +1,4 @@
-A note on a multivariate lookup argument based on logarithmic derivatives. 
+## A note on a multivariate lookup argument based on logarithmic derivatives. 
 
 The repo started with a multivariate (standard) Plonk prover, leveraging logarithmic derivatives for the permutation argument. We decided to changed the focus with the publication of [Hyperplonk](https://eprint.iacr.org/2022/1355), switching to lookups, as there was nothing to add to their much more general (and beautiful) solution. 
 
