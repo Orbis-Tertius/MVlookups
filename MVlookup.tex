@@ -1231,7 +1231,7 @@ $M$ & 143 & 120 & 103 & 92
 
 \subsection{Comparison with logarithmic derivative lookups}
 
-The main advantage of logarithmic derivative lookups over the ones from the current section is not the arithmetic cost  as reflected by the operation counts  \eqref{e:lookup:cost}, \eqref{e:lookup:large:cost} and \eqref{e:lookup:cost}, \eqref{e:lookup:large:cost}, but the number and sizes of oracle functions the prover needs to provide.
+The main advantage of logarithmic derivative lookups over the ones from the current section is not the arithmetic cost  as reflected by the operation counts  \eqref{e:lookup:cost}, \eqref{e:lookup:large:cost} and \eqref{e:hyperplonk:cost}, \eqref{e:hyperplonk:large:cost}, but the number and sizes of oracle functions the prover needs to provide.
 That oracle costs depend on the used commitment scheme.
 To give an estimate for these costs in the case of an elliptic curve based Lagrange commitment scheme (such as the IPA), we 
 rely on a benchmark-backed equivalent of field multiplications for the multi-scalar multiplication in the Pallas curve.
@@ -1250,7 +1250,7 @@ $\log N$ &  Pippenger of size $N$ & $2^8\cdot N$ field mult. & equivalent field 
 \\\hline
 12 & $46.010$ ms &  $21.11$ ms & $N\cdot 557\cdot \mathsf M$
 \\
-14 & $153.67$ ms & $42.315$ ms & $N\cdot 464 \cdot \mathsf M$
+14 & $153.67$ ms & $84.78$ ms & $N\cdot 464 \cdot \mathsf M$
 \\
 16 & $522.13$ ms & $169.70$ ms & $N\cdot 394\cdot\mathsf M$
 \\
